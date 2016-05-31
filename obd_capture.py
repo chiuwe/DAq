@@ -4,12 +4,6 @@ import csv
 import smbus
 from datetime import datetime
 
-CTRL_REG1 = 0x2A
-CTRL_REG2 = 0x2B
-WHO_AM_I = 0x0D
-XYZ_DATA_CFG = 0x0E
-
-I2C_ADDRESS = 0x00
 MAX_SUPPORTED_COMMANDS = 7
 
 connection = None
