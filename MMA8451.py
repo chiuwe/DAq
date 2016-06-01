@@ -1,11 +1,12 @@
 import smbus
+import time
 
 CTRL_REG1 		= 0x2A
 CTRL_REG2 		= 0x2B
 XYZ_DATA_CFG 	= 0x0E
 WHO_AM_I 		= 0x0D
 MMA_DEVICEID 	= 0x1A
-ADDR 				= 0x1D
+ADDR			= 0x1D
 
 OUT_X_MSB = 0x01
 OUT_X_LSB = 0x02
@@ -86,3 +87,18 @@ class MMA8451:
 		return x, y, z
 	
 if __name__ == '__main__':
+
+	accel = MMA8451()
+	
+	ismma = accel.check8451()
+	if ismma:
+		print "MMA 8451 Found!"
+	else:
+		print "No MMA Found. What is this?!"
+	
+	accel.setup()
+	
+	while True:
+		x, y, z = accel.readData()
+		print "(" + str(x) + ", " + str(y) + ", " + str(z) + ")"
+		time.sleep(0.1)
