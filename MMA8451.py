@@ -66,7 +66,7 @@ class MMA8451:
 			self.divider = 2048.0
 		elif (mmaRange == RANGE_2_G):
 			self.divider = 4096.0
-		else
+		else:
 			self.divider = 1.0
 			print "Invalid Data Range Found. Printing raw, uncalibrated values."
 
