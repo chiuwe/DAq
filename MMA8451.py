@@ -43,20 +43,20 @@ class MMA8451:
 
 		return mma
 		
-	def setup(self, dataRange = Range_2_G):
+	def setup(self, dataRange = RANGE_2_G):
 		
 		# reset
-		bus.write_byte_data(ADDR, CTRL_REG2, 0x40)
+		self.bus.write_byte_data(ADDR, CTRL_REG2, 0x40)
 		
-		while bus.read_byte_data(ADDR, CTRL_REG2) & 0x40:
+		while self.bus.read_byte_data(ADDR, CTRL_REG2) & 0x40:
 			pass
 		
 		# set data range
-		bus.write_byte_data(ADDR, XYZ_DATA_CFG, dataRange)
+		self.bus.write_byte_data(ADDR, XYZ_DATA_CFG, dataRange)
 		# High resolution
-		bus.write_byte_data(ADDR, CTRL_REG2, 0x02)
+		self.bus.write_byte_data(ADDR, CTRL_REG2, 0x02)
 		# active and low noise mode
-		bus.write_byte_data(ADDR, CTRL_REG1, 0x01 | 0x04)
+		self.bus.write_byte_data(ADDR, CTRL_REG1, 0x01 | 0x04)
 		
 		mmaRange = self.bus.read_byte_data(ADDR, XYZ_DATA_CFG) & 0x03
 		
