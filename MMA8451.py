@@ -48,6 +48,7 @@ class MMA8451:
 		# reset
 		self.bus.write_byte_data(ADDR, CTRL_REG2, 0x40)
 		
+		time.sleep(0.1)
 		while self.bus.read_byte_data(ADDR, CTRL_REG2) & 0x40:
 			pass
 		
