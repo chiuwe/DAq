@@ -6,7 +6,9 @@ CTRL_REG2 		= 0x2B
 XYZ_DATA_CFG 	= 0x0E
 WHO_AM_I 		= 0x0D
 MMA_DEVICEID 	= 0x1A
-ADDR			= 0x1D
+ADDR				= 0x1D
+
+BITS 				= 14
 
 OUT_X_MSB = 0x01
 OUT_X_LSB = 0x02
@@ -20,7 +22,14 @@ RANGE_8_G = 0b10    # +/- 8g
 RANGE_4_G = 0b01    # +/- 4g
 RANGE_2_G = 0b00    # +/- 2g (default value)
 
+
+
 REVISION = ([l[12:-1] for l in open('/proc/cpuinfo','r').readlines() if l[:8]=="Revision"]+['0000'])[0]
+
+def twos_comp(val, bits = BITS):
+    if (val & (1 << (bits - 1))) != 0: # if sign bit is set e.g., 8bit: 128-255
+        val = val - (1 << bits)        # compute negative value
+    return val                         # return positive value as is
 
 class MMA8451:
 	
@@ -70,19 +79,21 @@ class MMA8451:
 		else:
 			self.divider = 1.0
 			print "Invalid Data Range Found. Printing raw, uncalibrated values."
-
-	
+		
 	def readData(self):
 		x = self.bus.read_byte_data(ADDR, OUT_X_MSB) << 8
 		x = (x | self.bus.read_byte_data(ADDR, OUT_X_LSB)) >> 2
+		x = twos_comp(x)
 		x = x / self.divider
 		
 		y = self.bus.read_byte_data(ADDR, OUT_Y_MSB) << 8
 		y = (y | self.bus.read_byte_data(ADDR, OUT_Y_LSB)) >> 2
+		y = twos_comp(y)
 		y = y / self.divider
 		
 		z = self.bus.read_byte_data(ADDR, OUT_Z_MSB) << 8
 		z = (z | self.bus.read_byte_data(ADDR, OUT_Z_LSB)) >> 2
+		z = twos_comp(z)
 		z = z / self.divider
 		
 		return x, y, z
