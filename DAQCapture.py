@@ -94,7 +94,7 @@ def logData():
 				'intakeTemp': connection.query(obd.commands.INTAKE_TEMP).value,
 				'maf': connection.query(obd.commands.MAF).value,
 				'throttlePos': connection.query(obd.commands.THROTTLE_POS).value,
-				'timingAdvance' : connection.query(obd.commands.TIMING_ADVANCE.value,
+				'timingAdvance' : connection.query(obd.commands.TIMING_ADVANCE).value,
 				'xG' : x,
 				'yG' : y,
 				'zG' : z,
