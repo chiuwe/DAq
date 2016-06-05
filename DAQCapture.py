@@ -99,6 +99,7 @@ def logData():
 				'gpsClimb' : gpsClimb})
 			time.sleep(0.1)
 	
+	debug("Exiting logging data.")
 	connection.stop()
 	connection.close()
 		
