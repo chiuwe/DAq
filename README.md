@@ -11,6 +11,7 @@ The data points collected are:
 - Intake temperature
 - MAF
 - Throttle position
+- Timing advance
 - Acceleration
 - GPS position
 

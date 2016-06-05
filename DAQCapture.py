@@ -8,7 +8,7 @@ from datetime import datetime
 
 MAX_SUPPORTED_COMMANDS = 52
 KPH_TO_MPH = 0.621371
-DEBUG = True
+DEBUG = False
 
 connection = None
 accel = None
@@ -40,6 +40,8 @@ def initConnection():
 				debug("MAF")
 				connection.watch(obd.commands.THROTTLE_POS)
 				debug("THROTTLE_POS")
+				connection.watch(obd.commands.TIMMING_ADVANCE)
+				debug("TIMING_ADVANCE")
 				connection.start()
 				debug("OBD watchdog started!")
 				break
@@ -57,7 +59,7 @@ def logData():
 	debug(filename)
 	
 	with open(filename, 'w') as csvfile:
-		fieldnames = ['time', 'engineLoad', 'coolantTemp', 'rpm', 'speed', 'intakeTemp', 'maf', 'throttlePos', 'xG', 'yG', 'zG', 'gpsSpeed', 'gpsLat', 'gpsLon', 'gpsAlt', 'gpsClimb']
+		fieldnames = ['time', 'engineLoad', 'coolantTemp', 'rpm', 'speed', 'intakeTemp', 'maf', 'throttlePos', 'timingAdvance', 'xG', 'yG', 'zG', 'gpsSpeed', 'gpsLat', 'gpsLon', 'gpsAlt', 'gpsClimb']
 		writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 		writer.writeheader()
 		
@@ -92,6 +94,7 @@ def logData():
 				'intakeTemp': connection.query(obd.commands.INTAKE_TEMP).value,
 				'maf': connection.query(obd.commands.MAF).value,
 				'throttlePos': connection.query(obd.commands.THROTTLE_POS).value,
+				'timingAdvance' : connection.query(obd.commands.TIMING_ADVANCE.value,
 				'xG' : x,
 				'yG' : y,
 				'zG' : z,
