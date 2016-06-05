@@ -40,8 +40,6 @@ def initConnection():
 				debug("MAF")
 				connection.watch(obd.commands.THROTTLE_POS)
 				debug("THROTTLE_POS")
-				connection.watch(obd.commands.AMBIANT_AIR_TEMP)
-				debug("AMBIANT_AIR_TEMP")
 				connection.start()
 				debug("OBD watchdog started!")
 				break
@@ -54,11 +52,12 @@ def initConnection():
 
 def logData():
 	filename = time.strftime("%Y%m%d%H%M.csv")
+	gpsSpeed = gpsLat = gpsLon = gpsAlt = gpsClimb = None
 	
 	debug(filename)
 	
 	with open(filename, 'w') as csvfile:
-		fieldnames = ['time', 'engineLoad', 'coolantTemp', 'rpm', 'speed', 'intakeTemp', 'maf', 'throttlePos', 'ambiantTemp', 'xG', 'yG', 'zG', 'gpsSpeed', 'gpsLat', 'gpsLon', 'gpsAlt', 'gpsClimb']
+		fieldnames = ['time', 'engineLoad', 'coolantTemp', 'rpm', 'speed', 'intakeTemp', 'maf', 'throttlePos', 'xG', 'yG', 'zG', 'gpsSpeed', 'gpsLat', 'gpsLon', 'gpsAlt', 'gpsClimb']
 		writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 		writer.writeheader()
 		
@@ -93,7 +92,6 @@ def logData():
 				'intakeTemp': connection.query(obd.commands.INTAKE_TEMP).value,
 				'maf': connection.query(obd.commands.MAF).value,
 				'throttlePos': connection.query(obd.commands.THROTTLE_POS).value,
-				'ambiantTemp' : connection.query(obd.commands.AMBIANT_AIR_TEMP).value,
 				'xG' : x,
 				'yG' : y,
 				'zG' : z,
