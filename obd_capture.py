@@ -4,64 +4,78 @@ import csv
 import smbus
 from datetime import datetime
 
-MAX_SUPPORTED_COMMANDS = 7
-
+MAX_SUPPORTED_COMMANDS = 52
+KPH_TO_MPH = 0.621371
 connection = None
-
-# select the correct i2c bus for this revision of Raspberry Pi
-revision = ([l[12:-1] for l in open('/proc/cpuinfo','r').readlines() if l[:8]=="Revision"]+['0000'])[0]
-bus = smbus.SMBus(1 if int(revision, 16) >= 4 else 0)
 
 def init_connection():
 	global connection
 	while True:
 		try:
-			connection = obd.OBD()
-			if connection.supported_commands >= MAX_SUPPORTED_COMMANDS:
+			connection = obd.Async()
+			print "connected"
+			if len(connection.supported_commands) >= MAX_SUPPORTED_COMMANDS:
+				print "passed"
 				connection.watch(obd.commands.ENGINE_LOAD)
+				print "ENGINE_LOAD"
 				connection.watch(obd.commands.COOLANT_TEMP)
+				print "COOLANT_TEMP"
 				connection.watch(obd.commands.RPM)
+				print "RPM"
 				connection.watch(obd.commands.SPEED)
+				print "SPEED"
 				connection.watch(obd.commands.INTAKE_TEMP)
-				connection.watch(obd.commnads.MAF)
+				print "INTAKE_TEMP"
+				connection.watch(obd.commands.MAF)
+				print "MAF"
 				connection.watch(obd.commands.THROTTLE_POS)
-				connection.watch(obd.commands.OIL_TEMP)
-				connection.watch(obd.commands.FUEL_RATE)
+				print "THROTTLE_POS"
+# 				connection.watch(obd.commands.OIL_TEMP)
+# 				print "OIL_TEMP"
+# 				connection.watch(obd.commands.FUEL_RATE)
+# 				print "FUEL_RATE"
 				connection.start()
+				print "OBD watchdog started!"
 				break
 			connection.close()
 			time.sleep(1)
+		except (KeyboardInterrupt, SystemExit):
+			raise
 		except:
 			pass
 
 def log_data():
 	filename = time.strftime("%Y%m%d%H%M.csv")
-
-	with open(filename, 'w') as csvfile:
-		fieldname = ['time', 'engine_load', 'coolant_temp', 'rpm', 'speed', 'intake_temp', 'maf', 'throttle_pos', 'oil_temp', 'fuel_rate']
-		writer = csv.DictWriter(csvfile. fieldnames=fieldnames)
 	
+	print filename
+	
+	with open(filename, 'w') as csvfile:
+		fieldnames = ['time', 'engine_load', 'coolant_temp', 'rpm', 'speed', 'intake_temp', 'maf', 'throttle_pos']
+		writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+		time.sleep(5)
 		writer.writeheader()
 		while connection.is_connected():
-			time = datetime.now().strftime("%X.%f")
+			timestamp = datetime.now().strftime("%X.%f")
 			writer.writerow(
-				{'time': time,
-				'engine_load': connection.query(obd.commands.ENGINE_LOAD),
-				'coolant_temp': connection.query(obd.commands.COOLANT_TEMP),
-				'rpm': connection.query(obd.commands.RPM),
-				'speed': connection.query(obd.commands.SPEED),
-				'intake_temp': connection.query(obd.commands.INTAKE_TEMP),
-				'maf': connection.query(obd.commands.MAF),
-				'throttle_pos': connection.query(obd.commands.THROTTLE_POS),
-				'oil_temp': connection.query(obd.commands.OIL_TEMP)
-				'fuel_rate': connection.query(obd.commands.FUEL_RATE)})
-			time.sleep(0.01)
+				{'time': timestamp,
+				'engine_load': connection.query(obd.commands.ENGINE_LOAD).value,
+				'coolant_temp': connection.query(obd.commands.COOLANT_TEMP).value,
+				'rpm': connection.query(obd.commands.RPM).value,
+				'speed': (connection.query(obd.commands.SPEED).value * KPH_TO_MPH),
+				'intake_temp': connection.query(obd.commands.INTAKE_TEMP).value,
+				'maf': connection.query(obd.commands.MAF).value,
+				'throttle_pos': connection.query(obd.commands.THROTTLE_POS).value,
+# 				'oil_temp': connection.query(obd.commands.OIL_TEMP).value,
+# 				'fuel_rate': connection.query(obd.commands.FUEL_RATE).value
+				})
+			time.sleep(0.1)
 	
 	connection.stop()
 	connection.close()
 		
 if __name__ == "__main__":
 	
+	print "hello world!"
 	while True:
 		init_connection()
 		log_data()
