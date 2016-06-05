@@ -3,7 +3,7 @@ import obd
 while True:
 	try:
 		connection = obd.OBD()
-		if len(connection.supported_commands) = 52:
+		if len(connection.supported_commands) >= 52:
 			break
 	except (KeyboardInterrupt, SystemExit):
 		raise
