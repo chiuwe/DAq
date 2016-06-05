@@ -1,1 +1,15 @@
 # DAq
+
+Raspberry Pi 3
+MMA8451 Accelerometer (I2C)
+Ultimate GPS Breakout V3 (miniUART)
+OBDII ELM327 (Bluetooth)
+
+
+/etc/rc.local
+# needed to connect bluetooth to serial port?
+sudo rfcomm bind rfcomm0 00:1D:A5:00:17:08 &
+
+# setting up I2C
+sudo chmod 666 /sys/module/i2c_bcm2708/parameters/combined
+sudo echo -n 1 > /sys/module/i2c_bcm2708/parameters/combined
