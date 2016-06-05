@@ -2,7 +2,7 @@ import obd
 import time
 import csv
 import smbus
-import MMA8451
+import MMA8451 as mma
 import gps
 from datetime import datetime
 
@@ -11,12 +11,14 @@ KPH_TO_MPH = 0.621371
 DEBUG = False
 
 connection = None
+accel = None
+session = None
 
 def debug(str):
 	if DEBUG:
 		print str
 
-def init_connection():
+def initConnection():
 	global connection
 	while True:
 		try:
@@ -48,27 +50,53 @@ def init_connection():
 		except:
 			pass
 
-def log_data():
+def logData():
 	filename = time.strftime("%Y%m%d%H%M.csv")
+	rpm = 1
 	
 	debug(filename)
 	
 	with open(filename, 'w') as csvfile:
-		fieldnames = ['time', 'engine_load', 'coolant_temp', 'rpm', 'speed', 'intake_temp', 'maf', 'throttle_pos']
+		fieldnames = ['time', 'engineLoad', 'coolantTemp', 'rpm', 'speed', 'intakeTemp', 'maf', 'throttlePos', 'xG', 'yG', 'zG', 'gpsSpeed', 'gpsLat', 'gpsLon', 'gpsAlt', 'gpsClimb']
 		writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-		time.sleep(5)
 		writer.writeheader()
-		while connection.is_connected():
+		
+		while connection.query(obd.commands.RPM).value == 0:
+			time.sleep(1)
+		
+		while rpm > 0:
 			timestamp = datetime.now().strftime("%X.%f")
+			x, y, z = accel.readData()
+			rpm = connection.query(obd.commands.RPM.value
+			report = session.next()
+			if report['class'] == 'TPV':
+				if hasattr(report, 'speed'):
+					gpsSpeed = report.speed * gps.MPS_TO_MPH
+				if hasattr(report, 'lat'):
+					gpsLat = report.lat
+				if hasattr(report, 'lon'):
+					gpsLon = report.lon
+				if hasattr(report, 'alt'):
+					gpsAlt = report.alt
+				if hasattr(report, 'climb'):
+					gpsClimb = report.climb * gps.MPS_TO_MPH
 			writer.writerow(
 				{'time': timestamp,
-				'engine_load': connection.query(obd.commands.ENGINE_LOAD).value,
-				'coolant_temp': connection.query(obd.commands.COOLANT_TEMP).value,
-				'rpm': connection.query(obd.commands.RPM).value,
+				'engineLoad': connection.query(obd.commands.ENGINE_LOAD).value,
+				'coolantTemp': connection.query(obd.commands.COOLANT_TEMP).value,
+				'rpm': rpm,
 				'speed': (connection.query(obd.commands.SPEED).value * KPH_TO_MPH),
-				'intake_temp': connection.query(obd.commands.INTAKE_TEMP).value,
+				'intakeTemp': connection.query(obd.commands.INTAKE_TEMP).value,
 				'maf': connection.query(obd.commands.MAF).value,
-				'throttle_pos': connection.query(obd.commands.THROTTLE_POS).value})
+				'throttlePos': connection.query(obd.commands.THROTTLE_POS).value,
+				'xG' : x,
+				'yG' : y,
+				'zG' : z,
+				'gpsSpeed' : gpsSpeed,
+				'gpsLat' : gpsLat,
+				'gpsLon' : gpsLon,
+				'gpsAlt' : gpsAlt,
+				'gpsClimb' : gpsClimb})
 			time.sleep(0.1)
 	
 	connection.stop()
@@ -76,6 +104,20 @@ def log_data():
 		
 if __name__ == "__main__":
 
+	global accel
+	global session
+	
+	accel = mma.MMA8451()
+	ismma = accel.check8451()
+	if ismma:
+		debug("MMA Found!")
+	else:
+		debug("No MMA Found.")
+	accel.setup()
+	
+	session = gps.gps("localhost", "2947")
+	session.stream(gps.WATCH_ENABLE | gps.WATCH_NEWSTYLE)
+	
 	while True:
-		init_connection()
-		log_data()
+		initConnection()
+		logData()
