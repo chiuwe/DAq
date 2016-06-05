@@ -110,9 +110,6 @@ def logData():
 	connection.close()
 		
 if __name__ == "__main__":
-
-	global accel
-	global session
 	
 	accel = mma.MMA8451()
 	ismma = accel.check8451()
