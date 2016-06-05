@@ -8,7 +8,7 @@ from datetime import datetime
 
 MAX_SUPPORTED_COMMANDS = 52
 KPH_TO_MPH = 0.621371
-DEBUG = False
+DEBUG = True
 
 connection = None
 accel = None
@@ -52,7 +52,6 @@ def initConnection():
 
 def logData():
 	filename = time.strftime("%Y%m%d%H%M.csv")
-	rpm = 1
 	
 	debug(filename)
 	
@@ -61,13 +60,16 @@ def logData():
 		writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 		writer.writeheader()
 		
-		while connection.query(obd.commands.RPM).value == 0:
+		rpm = connection.query(obd.commands.RPM).value
+		while rpm == None or rpm == 0.0:
+			rpm = connection.query(obd.commands.RPM).value
 			time.sleep(1)
 		
+		debug("Start logging data.")
 		while rpm > 0:
 			timestamp = datetime.now().strftime("%X.%f")
 			x, y, z = accel.readData()
-			rpm = connection.query(obd.commands.RPM.value
+			rpm = connection.query(obd.commands.RPM).value
 			report = session.next()
 			if report['class'] == 'TPV':
 				if hasattr(report, 'speed'):
