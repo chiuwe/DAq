@@ -22,7 +22,6 @@ svg {
 <script type="text/javascript">
 var data;
 var dataPoints = [
-	"time",
 	"engineLoad",
 	"coolantTemp",
 	"rpm",
@@ -30,9 +29,9 @@ var dataPoints = [
 	"intakeTemp",
 	"maf",
 	"throttlePos",
-	"xG",
-	"yG",
-	"zG",
+	//"xG",
+	//"yG",
+	//"zG",
 	"gpsSpeed",
 	"gpsLat",
 	"gpsLon",
@@ -66,49 +65,46 @@ d3.csv("201606051346.csv")
 		gpsLat: +d.gpsLat,
 		gpsLon: +d.gpsLon,
 		gpsAlt: +d.gpsAlt,
-		gpsClimb: +d.gpsClimb}; })
+		gpsClimb: +d.gpsClimb};
+	})
 	.get(function(error, rows) {
 			data = rows;
 		  processData();
-		});
+	});
 
 function processData() {
-	var xScale = d3.time.scale().domain([data[0].time, data[data.length-1].time]).range([MARGINS.left, width + MARGINS.left - MARGINS.right]);
-	xScale.tickFormat(d3.time.format("%H:%M:%S.%L"));
-
 	for (x in dataPoints) {
 		var svg = d3.select("body").append("svg")
 			.attr("width", width + MARGINS.left + MARGINS.right)
 			.attr("height", height + MARGINS.top + MARGINS.bottom);
-		var yScale = generateYAxis(dataPoints[x]);
-	//var gpsLatScale = generateYAxis("gpsLat");
 
+		// X-axis
+		var xScale = d3.time.scale().domain([data[0].time, data[data.length-1].time]).range([MARGINS.left, width + MARGINS.left - MARGINS.right]);
+		xScale.tickFormat(d3.time.format("%H:%M:%S.%L"));
 		var xAxis = d3.svg.axis().scale(xScale).ticks(10);
-		// X-axis label
 		svg.append("text")
 			.attr("x", width / 2)
 			.attr("y", height + MARGINS.bottom)
 			.style("text-anchor", "middle")
 			.text("Time");
+		svg.append("svg:g")
+			.attr('stroke-width', 1)
+			.attr('transform', 'translate(0,' + (height - MARGINS.bottom) + ')').call(xAxis);
+
+		// Y-axis
+		var yScale = generateYAxis(dataPoints[x]);
 		var yAxis = d3.svg.axis().scale(yScale).orient("left");
-		// Y-axis label
 		svg.append("text")
 			.attr("transform", "rotate(-90)")
 			.attr("x", 0 - (height / 2))
 			.attr("dy", "1em")
 			.style("text-anchor", "middle")
 			.text(dataPoints[x]);
-		
-		// Draw x-axis
-		svg.append("svg:g")
-			.attr('stroke-width', 1)
-			.attr('transform', 'translate(0,' + (height - MARGINS.bottom) + ')').call(xAxis);
-		// Draw y-axis
 		svg.append("svg:g")
 			.attr('transform', 'translate(' + MARGINS.left + ',0)')
 			.call(yAxis);
 
-		// Draw line
+		// Line
 		var lineFunc = d3.svg.line()
 			.x(function(d) {
 				return xScale(d["time"]);
@@ -122,6 +118,34 @@ function processData() {
 			.attr('stroke-width', 2)
 			.attr('fill', 'none');
 	}
+
+	// GPS graph
+	var gps = d3.select("body").append("svg")
+		.attr("width", 500)
+		.attr("height", 500);
+	var xScale = d3.scale.linear().domain([-1,1]).range([0,500]);
+	var xAxis = d3.svg.axis().scale(xScale).ticks(10);
+	gps.append("svg:g")
+		.attr('stroke-width', 1)
+		.attr('transform', 'translate(0,250)')
+		.call(xAxis);
+	var yScale = d3.scale.linear().domain([-1,1]).range([0,500]);
+	var yAxis = d3.svg.axis().scale(yScale).orient("left");
+	gps.append("svg:g")
+		.attr('transform', 'translate(250,0)')
+		.call(yAxis);
+	var lineFunc = d3.svg.line()
+		.x(function(d) {
+			return xScale(d["xG"]);
+			})
+		.y(function(d) {
+			return yScale(d["yG"]);
+		});
+	gps.append("svg:path")
+		.attr("d", lineFunc(data))
+		.attr("stroke", "blue")
+		.attr("stroke-width", 1)
+		.attr("fill", "none");
 }
 
 function generateYAxis(dataPoint) {
