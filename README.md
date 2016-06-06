@@ -4,15 +4,15 @@ DAq uses a Raspberry Pi 3 and various sensors to collect car performance data.
 
 The data points collected are:
 
-- Engine load
-- Coolant temperature
-- RPM
-- Speed
-- Intake temperature
-- MAF
-- Throttle position
-- Timing advance
-- Acceleration
+- Engine load (%)
+- Coolant temperature (&deg;C)
+- RPM (RPM)
+- Speed (MPH)
+- Intake temperature (&deg;C)
+- MAF (grams/sec)
+- Throttle position (%)
+- Timing advance (&deg; before TBC)
+- Acceleration (Gs)
 - GPS position
 
 ## Hardware Components
