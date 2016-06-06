@@ -11,7 +11,7 @@ The data points collected are:
 - Intake temperature (&deg;C)
 - MAF (grams/sec)
 - Throttle position (%)
-- Timing advance (&deg; before TBC)
+- Timing advance (&deg; before TDC)
 - Acceleration (Gs)
 - GPS position
 
