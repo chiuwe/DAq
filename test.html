@@ -1,0 +1,101 @@
+<html>
+<head>
+<meta charset="UTF-8"> 
+<title>DAq Dashboard</title>
+<script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+</head>
+<body>
+<h1>DAq Dashboard</h1>
+<div class="data"></div>
+<svg></svg>
+
+<script type="text/javascript">
+var width = 1000;
+var height = 500;
+var timeFormat = d3.time.format("%H:%M:%S.%L");
+var data;
+d3.csv("201606051346.csv")
+	.row(function(d) {return {
+		time: timeFormat.parse(d.time.replace(/(\.[0-9]{3})[0-9]*/, "$1")),
+		engineLoad: +d.engineLoad,
+		coolantTemp: +d.coolantTemp,
+		rpm: +d.rpm,
+		speed: +d.speed,
+		intakeTemp: +d.intakeTemp,
+		maf: +d.maf,
+		throttlePos: +d.throttlePos,
+		xG: +d.xG,
+		yG: +d.yG,
+		zG: +d.zG,
+		gpsSpeed: +d.gpsSpeed,
+		gpsLat: +d.gpsLat,
+		gpsLon: +d.gpsLon,
+		gpsAlt: +d.gpsAlt,
+		gpsClimb: +d.gpsClimb}; })
+	.get(function(error, rows) {data = rows; processData();});
+var MARGINS = {
+	top: 20,
+	right: 20,
+	bottom: 20,
+	left: 50
+};
+var svg = d3.select("svg")
+	.attr("width", width + MARGINS.left + MARGINS.right)
+	.attr("height", height + MARGINS.top + MARGINS.bottom);
+function processData() {
+	console.log(data);
+	
+	var timeScale = d3.time.scale().domain([data[0].time, data[data.length-1].time]).range([MARGINS.left, width - MARGINS.right]);
+	timeScale.tickFormat(d3.time.format("%H:%M:%S.%L"));
+	
+	var engineLoadScale = generateYAxis("engineLoad");
+
+	var xAxis = d3.svg.axis().scale(timeScale).ticks(10);
+	
+	// X-axis label
+	svg.append("text")
+		.attr("x", width / 2)
+		.attr("y", height + MARGINS.bottom)
+		.style("text-anchor", "middle")
+		.text("Time");
+	
+	// Y-axis label
+	svg.append("text")
+		.attr("transform", "rotate(-90)")
+		.attr("x", 0- (height / 2))
+		.attr("dy", "1.2em")
+		.style("text-anchor", "middle")
+		.text("Engine Load");
+	
+	var yAxis = d3.svg.axis().scale(engineLoadScale).orient("left");
+	svg.append("svg:g")
+		.attr('transform', 'translate(0,' + (height - MARGINS.bottom) + ')').call(xAxis);
+	svg.append("svg:g")
+		.attr('transform', 'translate(' + MARGINS.left + ',0)')
+		.call(yAxis);
+
+	
+	var lineFunc = d3.svg.line()
+		.x(function(d) {
+			return timeScale(d["time"]);
+		})
+		.y(function(d) {
+			return engineLoadScale(d["engineLoad"]);
+		});
+		
+		svg.append('svg:path')
+			.attr('d', lineFunc(data))
+			.attr('stroke', 'blue')
+			.attr('stroke-width', 2)
+			.attr('fill', 'none');
+}
+
+function generateYAxis(dataPoint) {
+	var maxDomain = d3.max(data, function(d) { return d[dataPoint]});
+	var minDomain = d3.min(data, function(d) { return d[dataPoint]});
+	return d3.scale.linear().domain([minDomain, maxDomain]).range([height - MARGINS.top, MARGINS.bottom]);
+}
+</script>
+
+</body>
+</html>
