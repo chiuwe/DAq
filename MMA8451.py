@@ -3,6 +3,8 @@ import time
 
 CTRL_REG1 		= 0x2A
 CTRL_REG2 		= 0x2B
+PL_STATUS		= 0x10
+PL_CFG			= 0x11
 XYZ_DATA_CFG 	= 0x0E
 WHO_AM_I 		= 0x0D
 MMA_DEVICEID 	= 0x1A
@@ -61,6 +63,8 @@ class MMA8451:
 		while self.bus.read_byte_data(ADDR, CTRL_REG2) & 0x40:
 			pass
 		
+		# turn on orientation config
+		self.bus.write_byte_data(ADDR, PL_CFG, 0x40)
 		# set data range
 		self.bus.write_byte_data(ADDR, XYZ_DATA_CFG, dataRange)
 		# High resolution
@@ -98,6 +102,9 @@ class MMA8451:
 		
 		return x, y, z
 	
+	def getOrientation(self):
+		return self.bus.read_byte_data(ADDR, PL_STATUS) & 0x07
+	
 if __name__ == '__main__':
 
 	accel = MMA8451()
@@ -113,4 +120,5 @@ if __name__ == '__main__':
 	while True:
 		x, y, z = accel.readData()
 		print "(" + str(x) + ", " + str(y) + ", " + str(z) + ")"
+		print accel.getOrientation()
 		time.sleep(0.1)
