@@ -8,6 +8,9 @@
 <body>
 
 <style>
+body {
+	font-family: Arial;
+}
 svg {
 	border: 1px solid #dddddd;
 }
@@ -15,9 +18,28 @@ svg {
 
 <h1>DAq Dashboard</h1>
 <div class="data"></div>
-<svg></svg>
 
 <script type="text/javascript">
+var data;
+var dataPoints = [
+	"time",
+	"engineLoad",
+	"coolantTemp",
+	"rpm",
+	"speed",
+	"intakeTemp",
+	"maf",
+	"throttlePos",
+	"xG",
+	"yG",
+	"zG",
+	"gpsSpeed",
+	"gpsLat",
+	"gpsLon",
+	"gpsAlt",
+	"gpsClimb"
+];
+var timeFormat = d3.time.format("%H:%M:%S.%L");
 var width = 1000;
 var height = 300;
 var MARGINS = {
@@ -26,8 +48,7 @@ var MARGINS = {
 	bottom: 20,
 	left: 100
 };
-var timeFormat = d3.time.format("%H:%M:%S.%L");
-var data;
+
 d3.csv("201606051346.csv")
 	.row(function(d) {return {
 		time: timeFormat.parse(d.time.replace(/(\.[0-9]{3})[0-9]*/, "$1")),
@@ -46,56 +67,61 @@ d3.csv("201606051346.csv")
 		gpsLon: +d.gpsLon,
 		gpsAlt: +d.gpsAlt,
 		gpsClimb: +d.gpsClimb}; })
-	.get(function(error, rows) {data = rows; processData();});
-var svg = d3.select("svg")
-	.attr("width", width + MARGINS.left + MARGINS.right)
-	.attr("height", height + MARGINS.top + MARGINS.bottom);
-function processData() {
-	console.log(data);
-	
-	var timeScale = d3.time.scale().domain([data[0].time, data[data.length-1].time]).range([MARGINS.left, width - MARGINS.right]);
-	timeScale.tickFormat(d3.time.format("%H:%M:%S.%L"));
-	
-	var engineLoadScale = generateYAxis("engineLoad");
-
-	var xAxis = d3.svg.axis().scale(timeScale).ticks(10);
-	
-	// X-axis label
-	svg.append("text")
-		.attr("x", width / 2)
-		.attr("y", height + MARGINS.bottom)
-		.style("text-anchor", "middle")
-		.text("Time");
-	
-	// Y-axis label
-	svg.append("text")
-		.attr("transform", "rotate(-90)")
-		.attr("x", 0 - (height / 2))
-		.attr("dy", "1em")
-		.style("text-anchor", "middle")
-		.text("Engine Load");
-	
-	var yAxis = d3.svg.axis().scale(engineLoadScale).orient("left");
-	svg.append("svg:g")
-		.attr('stroke-width', 2)
-		.attr('transform', 'translate(0,' + (height - MARGINS.bottom) + ')').call(xAxis);
-	svg.append("svg:g")
-		.attr('transform', 'translate(' + MARGINS.left + ',0)')
-		.call(yAxis);
-	
-	var lineFunc = d3.svg.line()
-		.x(function(d) {
-			return timeScale(d["time"]);
-		})
-		.y(function(d) {
-			return engineLoadScale(d["engineLoad"]);
+	.get(function(error, rows) {
+			data = rows;
+		  processData();
 		});
+
+function processData() {
+	var xScale = d3.time.scale().domain([data[0].time, data[data.length-1].time]).range([MARGINS.left, width + MARGINS.left - MARGINS.right]);
+	xScale.tickFormat(d3.time.format("%H:%M:%S.%L"));
+
+	for (x in dataPoints) {
+		var svg = d3.select("body").append("svg")
+			.attr("width", width + MARGINS.left + MARGINS.right)
+			.attr("height", height + MARGINS.top + MARGINS.bottom);
+		var yScale = generateYAxis(dataPoints[x]);
+	//var gpsLatScale = generateYAxis("gpsLat");
+
+		var xAxis = d3.svg.axis().scale(xScale).ticks(10);
+		// X-axis label
+		svg.append("text")
+			.attr("x", width / 2)
+			.attr("y", height + MARGINS.bottom)
+			.style("text-anchor", "middle")
+			.text("Time");
+		var yAxis = d3.svg.axis().scale(yScale).orient("left");
+		// Y-axis label
+		svg.append("text")
+			.attr("transform", "rotate(-90)")
+			.attr("x", 0 - (height / 2))
+			.attr("dy", "1em")
+			.style("text-anchor", "middle")
+			.text(dataPoints[x]);
 		
+		// Draw x-axis
+		svg.append("svg:g")
+			.attr('stroke-width', 1)
+			.attr('transform', 'translate(0,' + (height - MARGINS.bottom) + ')').call(xAxis);
+		// Draw y-axis
+		svg.append("svg:g")
+			.attr('transform', 'translate(' + MARGINS.left + ',0)')
+			.call(yAxis);
+
+		// Draw line
+		var lineFunc = d3.svg.line()
+			.x(function(d) {
+				return xScale(d["time"]);
+			})
+			.y(function(d) {
+				return yScale(d[dataPoints[x]]);
+			});
 		svg.append('svg:path')
 			.attr('d', lineFunc(data))
 			.attr('stroke', 'blue')
 			.attr('stroke-width', 2)
 			.attr('fill', 'none');
+	}
 }
 
 function generateYAxis(dataPoint) {
