@@ -27,7 +27,9 @@ The data points collected are:
 Added the following:
 
 ```
-# Needed to connect bluetooth to serial port?
+# Needed to connect bluetooth to serial port
+# 00:1D:A5:00:17:08 is the MAC address of the OBDII bluetooth device
+# & is needed to fork this call because it doesn't return (blocking call)
 sudo rfcomm bind rfcomm0 00:1D:A5:00:17:08 &
 
 # Setting up I2C
