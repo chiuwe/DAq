@@ -1,17 +1,31 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
 <meta charset="UTF-8"> 
 <title>DAq Dashboard</title>
 <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 </head>
 <body>
+
+<style>
+svg {
+	border: 1px solid #dddddd;
+}
+</style>
+
 <h1>DAq Dashboard</h1>
 <div class="data"></div>
 <svg></svg>
 
 <script type="text/javascript">
 var width = 1000;
-var height = 500;
+var height = 300;
+var MARGINS = {
+	top: 20,
+	right: 20,
+	bottom: 20,
+	left: 100
+};
 var timeFormat = d3.time.format("%H:%M:%S.%L");
 var data;
 d3.csv("201606051346.csv")
@@ -33,12 +47,6 @@ d3.csv("201606051346.csv")
 		gpsAlt: +d.gpsAlt,
 		gpsClimb: +d.gpsClimb}; })
 	.get(function(error, rows) {data = rows; processData();});
-var MARGINS = {
-	top: 20,
-	right: 20,
-	bottom: 20,
-	left: 50
-};
 var svg = d3.select("svg")
 	.attr("width", width + MARGINS.left + MARGINS.right)
 	.attr("height", height + MARGINS.top + MARGINS.bottom);
@@ -62,18 +70,18 @@ function processData() {
 	// Y-axis label
 	svg.append("text")
 		.attr("transform", "rotate(-90)")
-		.attr("x", 0- (height / 2))
-		.attr("dy", "1.2em")
+		.attr("x", 0 - (height / 2))
+		.attr("dy", "1em")
 		.style("text-anchor", "middle")
 		.text("Engine Load");
 	
 	var yAxis = d3.svg.axis().scale(engineLoadScale).orient("left");
 	svg.append("svg:g")
+		.attr('stroke-width', 2)
 		.attr('transform', 'translate(0,' + (height - MARGINS.bottom) + ')').call(xAxis);
 	svg.append("svg:g")
 		.attr('transform', 'translate(' + MARGINS.left + ',0)')
 		.call(yAxis);
-
 	
 	var lineFunc = d3.svg.line()
 		.x(function(d) {
