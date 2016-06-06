@@ -40,7 +40,7 @@ def initConnection():
 				debug("MAF")
 				connection.watch(obd.commands.THROTTLE_POS)
 				debug("THROTTLE_POS")
-				connection.watch(obd.commands.TIMMING_ADVANCE)
+				connection.watch(obd.commands.TIMING_ADVANCE)
 				debug("TIMING_ADVANCE")
 				connection.start()
 				debug("OBD watchdog started!")
