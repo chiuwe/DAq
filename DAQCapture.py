@@ -70,10 +70,9 @@ def logData():
 		
 		debug("Start logging data.")
 		while rpm > 0:
-			timestamp = datetime.now().strftime("%X.%f")
-			x, y, z = accel.readData()
-			rpm = connection.query(obd.commands.RPM).value
 			report = session.next()
+			while report['class'] != 'TPV':
+				report = session.next()
 			if report['class'] == 'TPV':
 				if hasattr(report, 'speed'):
 					gpsSpeed = report.speed * gps.MPS_TO_MPH
@@ -85,6 +84,9 @@ def logData():
 					gpsAlt = report.alt
 				if hasattr(report, 'climb'):
 					gpsClimb = report.climb * gps.MPS_TO_MPH
+			timestamp = datetime.now().strftime("%X.%f")
+			x, y, z = accel.readData()
+			rpm = connection.query(obd.commands.RPM).value
 			writer.writerow(
 				{'time': timestamp,
 				'engineLoad': connection.query(obd.commands.ENGINE_LOAD).value,
