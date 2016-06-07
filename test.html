@@ -14,8 +14,20 @@ body {
 }
 
 svg {
-	border: 1px solid #dddddd;
+	/*border: 1px solid #ddd;*/
 	font-size: 0.75em;
+}
+
+path.domain {
+	stroke: #bbb;
+	stroke-width: 1px;
+	fill: none;
+}
+
+path.line {
+	stroke: blue;
+	stroke-width: 1px;
+	fill: none;
 }
 </style>
 
@@ -117,9 +129,7 @@ function processData() {
 			});
 		svg.append('svg:path')
 			.attr('d', lineFunc(data))
-			.attr('stroke', 'blue')
-			.attr('stroke-width', 2)
-			.attr('fill', 'none');
+			.attr("class", "line");
 	}
 
 	// GPS graph
