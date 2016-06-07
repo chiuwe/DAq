@@ -7,14 +7,13 @@
 </head>
 <body>
 
-<style>
+<style type="text/css">
 body {
 	font-family: sans-serif;
 	font-size: 16px;
 }
 
 svg {
-	/*border: 1px solid #ddd;*/
 	font-size: 0.75em;
 }
 
@@ -25,14 +24,14 @@ path.domain {
 }
 
 path.line {
-	stroke: blue;
+	stroke: #333;
 	stroke-width: 1px;
 	fill: none;
 }
 </style>
 
 <h1>DAq Dashboard</h1>
-<div class="data"></div>
+<div id="data"></div>
 
 <script type="text/javascript">
 var dataPoints = [
@@ -54,7 +53,7 @@ var dataPoints = [
 ];
 var timeFormat = d3.time.format("%H:%M:%S.%L");
 var width = 1000;
-var height = 300;
+var height = 200;
 var MARGINS = {
 	top: 20,
 	right: 20,
@@ -127,9 +126,42 @@ function processData() {
 			.y(function(d) {
 				return yScale(d[dataPoints[x].type]);
 			});
-		svg.append('svg:path')
+		var line = svg.append('svg:path')
 			.attr('d', lineFunc(data))
 			.attr("class", "line");
+		
+		// Hover tooltip
+		var dot = svg.append("circle")
+			.attr("cx", 100)
+			.attr("cy", 100)
+			.attr("r",3)
+			.attr("opacity", 0)
+			.attr("fill", "red");
+		var path = line.node();
+		var pathLength = path.getTotalLength();
+		var BBox = path.getBBox();
+		var scale = pathLength/BBox.width;
+		var offsetLeft = document.getElementById("data").offsetLeft;
+		svg.on("mousemove", function() {
+			var x = d3.event.pageX - offsetLeft;
+			var beginning = x;
+			var end = pathLength;
+			var target;
+			while(true) {
+				target = Math.floor((beginning + end) / 2);
+				pos = path.getPointAtLength(target);
+				if ((target === end || target === beginning) && pos.x !== x) {
+					break;
+				}
+				if (pos.x > x)			end = target;
+				else if (pos.x < x)		beginning = target;
+				else							break; //position found
+			}
+			
+			dot.attr("opacity", 1)
+				.attr("cx", x)
+				.attr("cy", pos.y);
+		});
 	}
 
 	// GPS graph
