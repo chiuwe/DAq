@@ -9,10 +9,13 @@
 
 <style>
 body {
-	font-family: Arial;
+	font-family: sans-serif;
+	font-size: 16px;
 }
+
 svg {
 	border: 1px solid #dddddd;
+	font-size: 0.75em;
 }
 </style>
 
@@ -20,23 +23,22 @@ svg {
 <div class="data"></div>
 
 <script type="text/javascript">
-var data;
 var dataPoints = [
-	"engineLoad",
-	"coolantTemp",
-	"rpm",
-	"speed",
-	"intakeTemp",
-	"maf",
-	"throttlePos",
-	//"xG",
-	//"yG",
-	//"zG",
-	"gpsSpeed",
-	"gpsLat",
-	"gpsLon",
-	"gpsAlt",
-	"gpsClimb"
+	{type: "engineLoad", name: "Engine Load", unit: "%"},
+	{type: "coolantTemp", name: "Coolant Temp", unit: "°C"},
+	{type: "rpm", name: "RPM", unit: "rpm"},
+	{type: "speed", name: "Speed", unit: "mph"},
+	{type: "intakeTemp", name: "Intake Temperature", unit: "°C"},
+	{type: "maf", name: "MAF", unit: "grams/sec"},
+	{type: "throttlePos", name: "Throttle Position", unit: "%"},
+	//{type: "xG", name: "X-axis G-force", unit: "G"},
+	//{type: "yG", name: "Y-axis G-force", unit: "G"},
+	//{type: "zG", name: "Z-axis G-force", unit: "G"},
+	{type: "gpsSpeed", name: "GPS Speed", unit: "mph"},
+	{type: "gpsLat", name: "Latitude", unit: "°"},
+	{type: "gpsLon", name: "Longitude", unit: "°"},
+	{type: "gpsAlt", name: "Altitude", unit: "Unknown"},
+	{type: "gpsClimb", name: "Climb", unit: "Unknown"}
 ];
 var timeFormat = d3.time.format("%H:%M:%S.%L");
 var width = 1000;
@@ -45,7 +47,7 @@ var MARGINS = {
 	top: 20,
 	right: 20,
 	bottom: 20,
-	left: 100
+	left: 80
 };
 
 d3.csv("201606051346.csv")
@@ -81,7 +83,7 @@ function processData() {
 		// X-axis
 		var xScale = d3.time.scale().domain([data[0].time, data[data.length-1].time]).range([MARGINS.left, width + MARGINS.left - MARGINS.right]);
 		xScale.tickFormat(d3.time.format("%H:%M:%S.%L"));
-		var xAxis = d3.svg.axis().scale(xScale).ticks(10);
+		var xAxis = d3.svg.axis().scale(xScale).ticks(6);
 		svg.append("text")
 			.attr("x", width / 2)
 			.attr("y", height + MARGINS.bottom)
@@ -89,17 +91,18 @@ function processData() {
 			.text("Time");
 		svg.append("svg:g")
 			.attr('stroke-width', 1)
-			.attr('transform', 'translate(0,' + (height - MARGINS.bottom) + ')').call(xAxis);
+			.attr('transform', 'translate(0,' + (height - MARGINS.bottom) + ')')
+			.call(xAxis);
 
 		// Y-axis
-		var yScale = generateYAxis(dataPoints[x]);
+		var yScale = generateYAxis(dataPoints[x].type);
 		var yAxis = d3.svg.axis().scale(yScale).orient("left");
 		svg.append("text")
 			.attr("transform", "rotate(-90)")
 			.attr("x", 0 - (height / 2))
 			.attr("dy", "1em")
 			.style("text-anchor", "middle")
-			.text(dataPoints[x]);
+			.text(dataPoints[x].name + " (" + dataPoints[x].unit + ")");
 		svg.append("svg:g")
 			.attr('transform', 'translate(' + MARGINS.left + ',0)')
 			.call(yAxis);
@@ -110,7 +113,7 @@ function processData() {
 				return xScale(d["time"]);
 			})
 			.y(function(d) {
-				return yScale(d[dataPoints[x]]);
+				return yScale(d[dataPoints[x].type]);
 			});
 		svg.append('svg:path')
 			.attr('d', lineFunc(data))
