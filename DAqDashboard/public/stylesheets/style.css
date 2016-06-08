@@ -1,8 +1,33 @@
 body {
-  padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  font-family: sans-serif;
+  font-size: 16px;
 }
 
 a {
   color: #00B7FF;
+}
+
+svg {
+  font-size: 0.75em;
+}
+
+path.domain {
+  stroke: #bbb;
+  stroke-width: 1px;
+  fill: none;
+}
+
+path.line {
+  stroke: #333;
+  stroke-width: 1px;
+  fill: none;
+}
+
+path.blue {
+	stroke: blue;
+}
+
+.overlay {
+	fill: none;
+	pointer-events: all;
 }

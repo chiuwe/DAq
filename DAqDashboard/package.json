@@ -9,6 +9,7 @@
   "author": "Arielle",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.13.4"
+    "express": "^4.13.4",
+    "pug": "^2.0.0-beta2"
   }
 }

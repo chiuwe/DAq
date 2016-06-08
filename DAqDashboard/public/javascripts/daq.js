@@ -1,39 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8"> 
-<title>DAq Dashboard</title>
-<script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
-</head>
-<body>
-
-<style type="text/css">
-body {
-	font-family: sans-serif;
-	font-size: 16px;
-}
-
-svg {
-	font-size: 0.75em;
-}
-
-path.domain {
-	stroke: #bbb;
-	stroke-width: 1px;
-	fill: none;
-}
-
-path.line {
-	stroke: #333;
-	stroke-width: 1px;
-	fill: none;
-}
-</style>
-
-<h1>DAq Dashboard</h1>
-<div id="data"></div>
-
-<script type="text/javascript">
 var dataPoints = [
 	{type: "engineLoad", name: "Engine Load", unit: "%"},
 	{type: "coolantTemp", name: "Coolant Temp", unit: "°C"},
@@ -60,8 +24,9 @@ var MARGINS = {
 	bottom: 20,
 	left: 80
 };
+var data;
 
-d3.csv("201606051346.csv")
+d3.csv("/csv/201606051346.csv")
 	.row(function(d) {return {
 		time: timeFormat.parse(d.time.replace(/(\.[0-9]{3})[0-9]*/, "$1")),
 		engineLoad: +d.engineLoad,
@@ -81,8 +46,8 @@ d3.csv("201606051346.csv")
 		gpsClimb: +d.gpsClimb};
 	})
 	.get(function(error, rows) {
-			data = rows;
-		  processData();
+		data = rows;
+		processData();
 	});
 
 function processData() {
@@ -129,39 +94,6 @@ function processData() {
 		var line = svg.append('svg:path')
 			.attr('d', lineFunc(data))
 			.attr("class", "line");
-		
-		// Hover tooltip
-		var dot = svg.append("circle")
-			.attr("cx", 100)
-			.attr("cy", 100)
-			.attr("r",3)
-			.attr("opacity", 0)
-			.attr("fill", "red");
-		var path = line.node();
-		var pathLength = path.getTotalLength();
-		var BBox = path.getBBox();
-		var scale = pathLength/BBox.width;
-		var offsetLeft = document.getElementById("data").offsetLeft;
-		svg.on("mousemove", function() {
-			var x = d3.event.pageX - offsetLeft;
-			var beginning = x;
-			var end = pathLength;
-			var target;
-			while(true) {
-				target = Math.floor((beginning + end) / 2);
-				pos = path.getPointAtLength(target);
-				if ((target === end || target === beginning) && pos.x !== x) {
-					break;
-				}
-				if (pos.x > x)			end = target;
-				else if (pos.x < x)		beginning = target;
-				else							break; //position found
-			}
-			
-			dot.attr("opacity", 1)
-				.attr("cx", x)
-				.attr("cy", pos.y);
-		});
 	}
 
 	// G-force graph
@@ -191,6 +123,92 @@ function processData() {
 		.attr("stroke", "blue")
 		.attr("stroke-width", 1)
 		.attr("fill", "none");
+	
+	// OBD Speed vs GPS Speed
+	var svg = d3.select("body").append("svg")
+		.attr("width", width + MARGINS.left + MARGINS.right)
+		.attr("height", height + MARGINS.top + MARGINS.bottom);
+
+	// X-axis
+	var xScale = d3.time.scale().domain([data[0].time, data[data.length-1].time]).range([MARGINS.left, width + MARGINS.left - MARGINS.right]);
+	xScale.tickFormat(d3.time.format("%H:%M:%S.%L"));
+	var xAxis = d3.svg.axis().scale(xScale).ticks(6);
+	svg.append("text")
+		.attr("x", width / 2)
+		.attr("y", height + MARGINS.bottom)
+		.style("text-anchor", "middle")
+		.text("Time");
+	svg.append("svg:g")
+		.attr('stroke-width', 1)
+		.attr('transform', 'translate(0,' + (height - MARGINS.bottom) + ')')
+		.call(xAxis);
+
+	// Y-axis
+	var yScale = generateYAxis('speed');
+	var yAxis = d3.svg.axis().scale(yScale).orient("left");
+	svg.append("text")
+		.attr("transform", "rotate(-90)")
+		.attr("x", 0 - (height / 2))
+		.attr("dy", "1em")
+		.style("text-anchor", "middle")
+		.text("OBD vs GPS Speed (mph)");
+	svg.append("svg:g")
+		.attr('transform', 'translate(' + MARGINS.left + ',0)')
+		.call(yAxis);
+
+	// OBD Speed Line
+	var OBDLineFunc = d3.svg.line()
+		.x(function(d) {
+			return xScale(d["time"]);
+		})
+		.y(function(d) {
+			return yScale(d['speed']);
+		});
+	var OBDLine = svg.append('svg:path')
+		.attr('d', OBDLineFunc(data))
+		.attr("class", "line");
+	
+	// GPS Speed Line
+	var gpsLineFunc = d3.svg.line()
+		.x(function(d) {
+			return xScale(d["time"]);
+		})
+		.y(function(d) {
+			return yScale(d['gpsSpeed']);
+		});
+	var gpsLine = svg.append('svg:path')
+		.attr('d', gpsLineFunc(data))
+		.attr("class", "line blue");
+	
+	// Tooltip
+	var tooltip = svg.append("g")
+		.attr("class", "tooltip")
+		.style("display", "none");
+	tooltip.append("circle")
+		.attr("fill", "red")
+		.attr("r", 3);
+	tooltip.append("text")
+		.attr("x", 7)
+		.attr("dy", ".35em");
+	svg.append("rect")
+		.attr("class", "overlay")
+		.attr("width", width + MARGINS.left + MARGINS.right)
+		.attr("height", height + MARGINS.top + MARGINS.bottom)
+		.on("mouseover", function() { tooltip.style("display", null); })
+		.on("mouseout", function () { tooltip.style("display", "none"); })
+		.on("mousemove", mousemove);
+	
+	var bisectTime = d3.bisector(function(d) { return d.time}).left;
+	function mousemove() {
+		var xPos = xScale.invert(d3.mouse(this)[0]);
+		var i = bisectTime(data, xPos);
+		var d0 = data[i-1];
+		var d1 = data[i];
+		var d = xPos - d0.time > d1.time - xPos ? d1 : d0;
+		console.log("translate(" + xScale(d.time) + "," + yScale(d['gpsSpeed']) + ")");
+		tooltip.attr("transform", "translate(" + xScale(d.time) + "," + yScale(d['gpsSpeed']) + ")");
+		tooltip.select("text").text(d['gpsSpeed']);
+	}
 }
 
 function generateYAxis(dataPoint) {
@@ -198,7 +216,3 @@ function generateYAxis(dataPoint) {
 	var minDomain = d3.min(data, function(d) { return d[dataPoint]});
 	return d3.scale.linear().domain([minDomain, maxDomain]).range([height - MARGINS.top, MARGINS.bottom]);
 }
-</script>
-
-</body>
-</html>
