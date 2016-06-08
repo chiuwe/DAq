@@ -8,7 +8,6 @@ a {
 }
 
 svg {
-  font-size: 0.75em;
 }
 
 path.domain {
@@ -30,4 +29,8 @@ path.blue {
 .overlay {
 	fill: none;
 	pointer-events: all;
+}
+
+.tick {
+	font-size: 0.75em;
 }

@@ -205,7 +205,6 @@ function processData() {
 		var d0 = data[i-1];
 		var d1 = data[i];
 		var d = xPos - d0.time > d1.time - xPos ? d1 : d0;
-		console.log("translate(" + xScale(d.time) + "," + yScale(d['gpsSpeed']) + ")");
 		tooltip.attr("transform", "translate(" + xScale(d.time) + "," + yScale(d['gpsSpeed']) + ")");
 		tooltip.select("text").text(d['gpsSpeed']);
 	}
