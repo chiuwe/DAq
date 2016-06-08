@@ -34,7 +34,7 @@ var data;
 render();
 function render() {
 var file = getSelectedValue();
-d3.selectAll("svg").remove();
+//d3.selectAll("svg").remove();
 console.log(file);
 d3.csv(file)
 	.row(function(d) {return {
@@ -117,7 +117,7 @@ function processData() {
 		.attr('stroke-width', 1)
 		.attr('transform', 'translate(0,250)')
 		.call(xAxis);
-	var yScale = d3.scale.linear().domain([-2,2]).range([0,500]);
+	var yScale = d3.scale.linear().domain([-2,2]).range([500,0]);
 	var yAxis = d3.svg.axis().scale(yScale).orient("left");
 	gForce.append("svg:g")
 		.attr('transform', 'translate(250,0)')
