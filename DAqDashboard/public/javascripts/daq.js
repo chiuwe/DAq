@@ -6,9 +6,10 @@ var dataPoints = [
 	{type: "intakeTemp", name: "Intake Temperature", unit: "°C"},
 	{type: "maf", name: "MAF", unit: "grams/sec"},
 	{type: "throttlePos", name: "Throttle Position", unit: "%"},
+	{type: "timingAdvance", name: "Timing Advance", unts: "° before TDC"},
 	//{type: "xG", name: "X-axis G-force", unit: "G"},
 	//{type: "yG", name: "Y-axis G-force", unit: "G"},
-	//{type: "zG", name: "Z-axis G-force", unit: "G"},
+	{type: "zG", name: "Z-axis G-force", unit: "G"},
 	{type: "gpsSpeed", name: "GPS Speed", unit: "mph"},
 	{type: "gpsLat", name: "Latitude", unit: "°"},
 	{type: "gpsLon", name: "Longitude", unit: "°"},
@@ -26,7 +27,7 @@ var MARGINS = {
 };
 var data;
 
-d3.csv("/csv/201606051346.csv")
+d3.csv("/csv/201606080721.csv")
 	.row(function(d) {return {
 		time: timeFormat.parse(d.time.replace(/(\.[0-9]{3})[0-9]*/, "$1")),
 		engineLoad: +d.engineLoad,
@@ -36,6 +37,7 @@ d3.csv("/csv/201606051346.csv")
 		intakeTemp: +d.intakeTemp,
 		maf: +d.maf,
 		throttlePos: +d.throttlePos,
+		timingAdvance: +d.timingAdvance,
 		xG: +d.xG,
 		yG: +d.yG,
 		zG: +d.zG,
