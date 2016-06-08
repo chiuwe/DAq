@@ -31,9 +31,9 @@ var MARGINS = {
 	left: 80
 };
 var data;
+render();
+function render() {
 var file = getSelectedValue();
-render(file);
-function render(file) {
 d3.selectAll("svg").remove();
 console.log(file);
 d3.csv(file)
