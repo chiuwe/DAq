@@ -4,4 +4,5 @@
 
 # Run Server
 
-`$ node app`
+`$ node app`  
+Navigate to http://localhost:3000

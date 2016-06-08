@@ -1,3 +1,14 @@
+function getSelectedValue() {
+	/*var dropdown = document.getElementById("files");
+	var index = dropdown.selectedIndex;
+	var file = dropdown.options[index].value;*/
+	var file = document.getElementById("files").value;
+	if (typeof file === 'undefined') {
+		file = document.getElementById("files").options[1].value;
+	}
+	return "/csv/" + file;
+}
+
 var dataPoints = [
 	{type: "engineLoad", name: "Engine Load", unit: "%"},
 	{type: "coolantTemp", name: "Coolant Temp", unit: "°C"},
@@ -25,8 +36,12 @@ var MARGINS = {
 	left: 80
 };
 var data;
-
-d3.csv("/csv/201606051346.csv")
+var file = getSelectedValue();
+render(file);
+function render(file) {
+d3.selectAll("svg").remove();
+console.log(file);
+d3.csv(file)
 	.row(function(d) {return {
 		time: timeFormat.parse(d.time.replace(/(\.[0-9]{3})[0-9]*/, "$1")),
 		engineLoad: +d.engineLoad,
@@ -52,7 +67,7 @@ d3.csv("/csv/201606051346.csv")
 
 function processData() {
 	for (x in dataPoints) {
-		var svg = d3.select("body").append("svg")
+		var svg = d3.select("main").append("svg")
 			.attr("width", width + MARGINS.left + MARGINS.right)
 			.attr("height", height + MARGINS.top + MARGINS.bottom);
 
@@ -97,7 +112,7 @@ function processData() {
 	}
 
 	// G-force graph
-	var gForce = d3.select("body").append("svg")
+	var gForce = d3.select("main").append("svg")
 		.attr("width", 500)
 		.attr("height", 500);
 	var xScale = d3.scale.linear().domain([-2,2]).range([0,500]);
@@ -125,7 +140,7 @@ function processData() {
 		.attr("fill", "none");
 	
 	// OBD Speed vs GPS Speed
-	var svg = d3.select("body").append("svg")
+	var svg = d3.select("main").append("svg")
 		.attr("width", width + MARGINS.left + MARGINS.right)
 		.attr("height", height + MARGINS.top + MARGINS.bottom);
 
@@ -208,6 +223,7 @@ function processData() {
 		tooltip.attr("transform", "translate(" + xScale(d.time) + "," + yScale(d['gpsSpeed']) + ")");
 		tooltip.select("text").text(d['gpsSpeed']);
 	}
+}
 }
 
 function generateYAxis(dataPoint) {

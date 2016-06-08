@@ -1,14 +1,15 @@
 // Module dependencies
 var express = require('express');
 var routes = require('./routes');
-var user = require('./routes/user');
+//var user = require('./routes/user');
 var http = require('http');
 var path = require('path');
+var fs = require('fs');
 
 var app = express();
 
 // all environments
-app.set('port', process.env.PORT || 3000);
+app.set('port', 3000);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 //app.use(express.favicon());
@@ -33,7 +34,8 @@ app.get('/', function(req, res) {
 	res.sendFile("index.html", options);
 });
 app.get('/test', function(req, res) {
-	res.render('index', {title: 'DAq Dashboard'});
+	var files = fs.readdirSync(path.join(__dirname,'/public/csv'));
+	res.render('index', {title: 'DAq Dashboard', csvFiles: files});
 });
 
 http.createServer(app).listen(app.get('port'), function(){

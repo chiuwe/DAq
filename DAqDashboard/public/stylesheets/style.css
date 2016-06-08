@@ -7,6 +7,11 @@ a {
   color: #00B7FF;
 }
 
+header * {
+	display: inline-block;
+	padding-right: 2em;
+}
+
 svg {
 }
 
