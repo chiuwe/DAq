@@ -34,8 +34,8 @@ var data;
 render();
 function render() {
 var file = getSelectedValue();
-//d3.selectAll("svg").remove();
-console.log(file);
+d3.selectAll("svg").remove();
+//console.log(file);
 d3.csv(file)
 	.row(function(d) {return {
 		time: timeFormat.parse(d.time.replace(/(\.[0-9]{3})[0-9]*/, "$1")),
