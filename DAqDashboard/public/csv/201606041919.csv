@@ -1,4 +1,4 @@
-time,engine_load,coolant_temp,rpm,speed,intake_temp,maf,throttle_pos
+time,engineLoad,coolantTemp,rpm,speed,intakeTemp,maf,throttlePos
 19:19:18.088839,46.27450980392157,85,1123.0,0,61,15.27,0.0
 19:19:18.189448,46.27450980392157,85,1123.0,0,61,15.27,0.0
 19:19:18.289958,46.27450980392157,85,1123.0,0,61,15.27,0.0

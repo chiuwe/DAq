@@ -1,11 +1,5 @@
 function getSelectedValue() {
-	/*var dropdown = document.getElementById("files");
-	var index = dropdown.selectedIndex;
-	var file = dropdown.options[index].value;*/
 	var file = document.getElementById("files").value;
-	if (typeof file === 'undefined') {
-		file = document.getElementById("files").options[1].value;
-	}
 	return "/csv/" + file;
 }
 
