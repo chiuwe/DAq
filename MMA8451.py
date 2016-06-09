@@ -8,6 +8,9 @@ PL_CFG			= 0x11
 XYZ_DATA_CFG 	= 0x0E
 WHO_AM_I 		= 0x0D
 MMA_DEVICEID 	= 0x1A
+OFF_X				= 0x2F
+OFF_Y				= 0x30
+OFF_Z				= 0x31
 ADDR				= 0x1D
 
 BITS 				= 14
@@ -110,6 +113,31 @@ class MMA8451:
 	
 	def getOrientation(self):
 		return self.bus.read_byte_data(ADDR, PL_STATUS) & 0x07
+		
+	def zeroAxes(self):
+		sampleX = sampleY = sampleZ = 0
+		for x in range(10):
+			x, y, z = self.readData()
+			sampleX += x
+			sampleY += y
+			sampleZ += z
+			time.sleep(0.01)
+		# average and converts to milliGs
+		aveX = int(sampleX * 100)
+		aveY = int(sampleY * 100)
+		aveZ = int(sampleZ * 100)
+		
+		print "(" + str(aveX) + ", " + str(aveY) + ", " + str(aveZ) + ")"
+		
+		self.bus.write_byte_data(ADDR, OFF_X, intToTwos(aveX))
+		self.bus.write_byte_data(ADDR, OFF_Y, intToTwos(aveY))
+		self.bus.write_byte_data(ADDR, OFF_Z, intToTwos(aveZ))
+		
+		time.sleep(0.1)
+		
+		print(self.bus.read_byte_data(ADDR, OFF_X))
+		print(self.bus.read_byte_data(ADDR, OFF_Y))
+		print(self.bus.read_byte_data(ADDR, OFF_Z))
 	
 if __name__ == '__main__':
 
