@@ -28,9 +28,10 @@ RANGE_2_G = 0b00    # +/- 2g (default value)
 
 REVISION = ([l[12:-1] for l in open('/proc/cpuinfo','r').readlines() if l[:8]=="Revision"]+['0000'])[0]
 
-def intToTwos(val):
+def intToTwos(val, bits = 8):
+	mask = 2**bits - 1
 	if val < 0:
-		val = ~val + 1
+		val = (abs(val) ^ mask) + 1
 	return val
 
 def twosToInt(val, bits = BITS):
