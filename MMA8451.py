@@ -13,7 +13,8 @@ OFF_Y				= 0x30
 OFF_Z				= 0x31
 ADDR				= 0x1D
 
-BITS 				= 14
+DEFAULT_MASK	= 8
+DATA_BIT_SIZE	= 14
 
 OUT_X_MSB = 0x01
 OUT_X_LSB = 0x02
@@ -31,13 +32,13 @@ RANGE_2_G = 0b00    # +/- 2g (default value)
 
 REVISION = ([l[12:-1] for l in open('/proc/cpuinfo','r').readlines() if l[:8]=="Revision"]+['0000'])[0]
 
-def intToTwos(val, bits = 8):
+def intToTwos(val, bits = DEFAULT_MASK):
 	mask = 2**bits - 1
 	if val < 0:
 		val = (abs(val) ^ mask) + 1
 	return val
 
-def twosToInt(val, bits = BITS):
+def twosToInt(val, bits = DATA_BIT_SIZE):
     if (val & (1 << (bits - 1))) != 0: # if sign bit is set e.g., 8bit: 128-255
         val = val - (1 << bits)        # compute negative value
     return val                         # return positive value as is
