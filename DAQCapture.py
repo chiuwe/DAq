@@ -18,6 +18,10 @@ def debug(str):
 	if DEBUG:
 		print str
 
+# Personal accelerometer orientation
+def orientateData(x, y, z):
+	return y, z, x
+
 def initConnection():
 	global connection
 	while True:
@@ -85,7 +89,8 @@ def logData():
 				if hasattr(report, 'climb'):
 					gpsClimb = report.climb * gps.MPS_TO_MPH
 			timestamp = datetime.now().strftime("%X.%f")
-			x, y, z = accel.readData()
+			x, y, z = accel.readScaledData()
+			x, y, z = orientateData(x, y, z)
 			rpm = connection.query(obd.commands.RPM).value
 			writer.writerow(
 				{'time': timestamp,
