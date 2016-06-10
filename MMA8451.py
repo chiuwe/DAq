@@ -93,20 +93,28 @@ class MMA8451:
 		else:
 			self.divider = 1.0
 			print "Invalid Data Range Found. Printing raw, uncalibrated values."
-		
-	def readData(self):
+	
+	def readRawData(self):
 		x = self.bus.read_byte_data(ADDR, OUT_X_MSB) << 8
 		x = (x | self.bus.read_byte_data(ADDR, OUT_X_LSB)) >> 2
-		x = twosToInt(x)
-		x = x / self.divider
 		
 		y = self.bus.read_byte_data(ADDR, OUT_Y_MSB) << 8
 		y = (y | self.bus.read_byte_data(ADDR, OUT_Y_LSB)) >> 2
-		y = twosToInt(y)
-		y = y / self.divider
 		
 		z = self.bus.read_byte_data(ADDR, OUT_Z_MSB) << 8
 		z = (z | self.bus.read_byte_data(ADDR, OUT_Z_LSB)) >> 2
+		
+		return x, y, z
+		
+	def readScaledData(self):
+		x, y, z = self.readRawData()
+		
+		x = twosToInt(x)
+		x = x / self.divider
+		
+		y = twosToInt(y)
+		y = y / self.divider
+		
 		z = twosToInt(z)
 		z = z / self.divider
 		
