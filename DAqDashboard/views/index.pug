@@ -1,0 +1,9 @@
+extends layout
+
+block content
+	header
+		h1= title
+		select#files(onchange="render();" value="0")
+			each file, i in csvFiles
+				option= file
+	main

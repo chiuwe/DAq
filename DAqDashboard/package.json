@@ -1,0 +1,15 @@
+{
+  "name": "daq-dashboard",
+  "version": "0.0.1",
+  "description": "DAq Dashboard",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js"
+  },
+  "author": "Arielle",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.13.4",
+    "pug": "^2.0.0-beta2"
+  }
+}

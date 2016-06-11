@@ -1,2 +1,6 @@
 # Complied code
 *.pyc
+
+# Node
+node_modules
+npm-debug.log
