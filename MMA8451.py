@@ -136,7 +136,7 @@ if __name__ == '__main__':
 	accel.setup()
 	
 	while True:
-		x, y, z = accel.readData()
+		x, y, z = accel.readScaledData()
 		print "(" + str(x) + ", " + str(y) + ", " + str(z) + ")"
 		print accel.getOrientation()
 		time.sleep(0.1)
