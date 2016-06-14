@@ -26,6 +26,7 @@ def initConnection():
 	global connection
 	while True:
 		try:
+			debug("connecting...")	
 			connection = obd.Async()
 			debug("connected")
 			if len(connection.supported_commands) >= MAX_SUPPORTED_COMMANDS:
@@ -105,10 +106,9 @@ def logData():
 				'xG' : x,
 				'yG' : y,
 				'zG' : z,
-				'orientation' : accel.getOrientation(),
 				'gpsSpeed' : gpsSpeed,
-				'gpsLat' : gpsLat,
 				'gpsLon' : gpsLon,
+				'gpsLat' : gpsLat,
 				'gpsAlt' : gpsAlt,
 				'gpsClimb' : gpsClimb})
 			time.sleep(0.1)
