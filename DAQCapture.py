@@ -4,23 +4,57 @@ import csv
 import smbus
 import MMA8451 as mma
 import gps
+import RPi.GPIO as GPIO
 from datetime import datetime
 
+ORIENTATION_MAPPING = {
+}
 MAX_SUPPORTED_COMMANDS = 52
 KPH_TO_MPH = 0.621371
+DIP_IO = [13, 16, 19]
 DEBUG = False
 
 connection = None
 accel = None
 session = None
+globalX = None
+globalY = None
+globalZ = None
 
 def debug(str):
 	if DEBUG:
 		print str
+		
+def setupDipSwitch():
+	GPIO.setmode(GPIO.BCM)
+	for x in DIP_IO:
+		GPIO.setup(x, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
-# Personal accelerometer orientation
-def orientateData(x, y, z):
-	return y, z, x
+# Direction of accelerometer
+# Front 				Down (getOrientation())
+# 0 Front			Front
+# 1 Back				Back
+# 2 Up				PU
+# 3 Right			PD
+# 4 Down				LR
+# 5 Left				LL
+def setupDataOrientate():
+	dipSetBits = 0
+	bitShift = 0
+	downDir = mma.getOrientation()
+	for x in DIP_IO:
+		dipSetBits = dipSetBtis | (GPIO.in(x) << bitShift)
+		bitShift += 1
+	if dipSetBits <= 1:
+		if dipSetBits:
+			globalX = '-z'
+		else:
+			globalX = 'z'
+	else:
+		downDir = downDir >> 1
+
+def oritentateData(x, y, z):
+	return -z, y, -x
 
 def initConnection():
 	global connection
