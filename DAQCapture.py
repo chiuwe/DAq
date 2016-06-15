@@ -2,13 +2,14 @@ import obd
 import time
 import csv
 import smbus
+import sys
 import MMA8451 as mma
 import gps
 from datetime import datetime
 
 MAX_SUPPORTED_COMMANDS = 52
 KPH_TO_MPH = 0.621371
-DEBUG = False
+DEBUG = True
 
 connection = None
 accel = None
@@ -17,6 +18,7 @@ session = None
 def debug(str):
 	if DEBUG:
 		print str
+		sys.stdout.flush()
 
 # Personal accelerometer orientation
 def orientateData(x, y, z):
