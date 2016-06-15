@@ -139,10 +139,9 @@ def logData():
 				'xG' : x,
 				'yG' : y,
 				'zG' : z,
-				'orientation' : accel.getOrientation(),
 				'gpsSpeed' : gpsSpeed,
-				'gpsLat' : gpsLat,
 				'gpsLon' : gpsLon,
+				'gpsLat' : gpsLat,
 				'gpsAlt' : gpsAlt,
 				'gpsClimb' : gpsClimb})
 			time.sleep(0.1)
