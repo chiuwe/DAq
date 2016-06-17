@@ -2,7 +2,6 @@ import obd
 import time
 import csv
 import smbus
-import sys
 import MMA8451 as mma
 import gps
 import RPi.GPIO as GPIO
@@ -38,12 +37,13 @@ ORIENTATION_MAPPING = {
 
 MAX_SUPPORTED_COMMANDS = 52
 KPH_TO_MPH = 0.621371
-DIP_IO = [13, 16, 19]
+DIP_PINS = [13, 16, 19]
+LED_PINS = [5, 6]
 PL_MASK = 0b11
 PL_BITS = 2
 BAFRO = 0b100000
 BAFRO_THRES = 0.5
-DEBUG = False
+DEBUG = True
 
 # Global Variables
 connection = None
@@ -55,10 +55,13 @@ def debug(str):
 	if DEBUG:
 		print str
 		
-def setupDipSwitch():
+def setupGPIO():
 	GPIO.setmode(GPIO.BCM)
-	for x in DIP_IO:
+	for x in DIP_PINS:
 		GPIO.setup(x, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+	for x in LED_PINS:
+		GPIO.setup(x, GPIO.OUT)
+		GPIO.output(x, 0)
 
 # Direction of accelerometer
 # Front 				Down (getOrientation())
@@ -77,7 +80,7 @@ def setupDataOrientation():
 	
 	debug("mmaOr: " + bin(mmaOr))
 	debug("(" + str(x) + ", " + str(y) + ", " + str(z) + ")")
-	for i in DIP_IO:
+	for i in DIP_PINS:
 		dipSetBits = dipSetBits | (GPIO.input(i) << bitShift)
 		bitShift += 1
 	debug("dipSetBits: " + bin(dipSetBits))
@@ -95,19 +98,16 @@ def setupDataOrientation():
 		print "key not found: " + bin(key)
 		transform = lambda x, y, z: (-y, z, -x)
 
-
-# https://github.com/brendan-w/python-OBD/issues/31
 def initConnection():
 	global connection
 	while True:
 		try:
-			debug("connecting...")	
 			connection = obd.Async()
 			debug("connected")
 			if len(connection.supported_commands) >= MAX_SUPPORTED_COMMANDS:
 				debug("passed")
-# 				connection.watch(obd.commands.ENGINE_LOAD)
-# 				debug("ENGINE_LOAD")
+				connection.watch(obd.commands.ENGINE_LOAD)
+				debug("ENGINE_LOAD")
 				connection.watch(obd.commands.COOLANT_TEMP)
 				debug("COOLANT_TEMP")
 				connection.watch(obd.commands.RPM)
@@ -120,10 +120,11 @@ def initConnection():
 				debug("MAF")
 				connection.watch(obd.commands.THROTTLE_POS)
 				debug("THROTTLE_POS")
-# 				connection.watch(obd.commands.TIMING_ADVANCE)
-# 				debug("TIMING_ADVANCE")
+				connection.watch(obd.commands.TIMING_ADVANCE)
+				debug("TIMING_ADVANCE")
 				connection.start()
 				debug("OBD watchdog started!")
+				GPIO.output(LED_PINS[0], 1)
 				break
 			connection.close()
 			time.sleep(1)
@@ -134,12 +135,12 @@ def initConnection():
 
 def logData():
 	filename = time.strftime("%Y%m%d%H%M.csv")
-	gpsTime = gpsSpeed = gpsLat = gpsLon = gpsAlt = gpsClimb = None
+	gpsSpeed = gpsLat = gpsLon = gpsAlt = gpsClimb = None
 	
 	debug(filename)
 	
 	with open(filename, 'w') as csvfile:
-		fieldnames = ['time', 'coolantTemp', 'rpm', 'speed', 'intakeTemp', 'maf', 'throttlePos', 'xG', 'yG', 'zG', 'orientation', 'gpsTime', 'gpsSpeed', 'gpsLat', 'gpsLon', 'gpsAlt', 'gpsClimb']
+		fieldnames = ['time', 'engineLoad', 'coolantTemp', 'rpm', 'speed', 'intakeTemp', 'maf', 'throttlePos', 'timingAdvance', 'xG', 'yG', 'zG', 'orientation', 'gpsSpeed', 'gpsLat', 'gpsLon', 'gpsAlt', 'gpsClimb']
 		writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 		writer.writeheader()
 		
@@ -149,13 +150,12 @@ def logData():
 			time.sleep(1)
 		
 		debug("Start logging data.")
+		GPIO.output(LED_PINS[1], 1)
 		while rpm > 0:
 			report = session.next()
 			while report['class'] != 'TPV':
 				report = session.next()
 			if report['class'] == 'TPV':
-				if hasattr(report, 'time'):
-					gpsTime = report.time
 				if hasattr(report, 'speed'):
 					gpsSpeed = report.speed * gps.MPS_TO_MPH
 				if hasattr(report, 'lat'):
@@ -172,18 +172,17 @@ def logData():
 			rpm = connection.query(obd.commands.RPM).value
 			writer.writerow(
 				{'time': timestamp,
-# 				'engineLoad': connection.query(obd.commands.ENGINE_LOAD).value,
+				'engineLoad': connection.query(obd.commands.ENGINE_LOAD).value,
 				'coolantTemp': connection.query(obd.commands.COOLANT_TEMP).value,
 				'rpm': rpm,
 				'speed': (connection.query(obd.commands.SPEED).value * KPH_TO_MPH),
 				'intakeTemp': connection.query(obd.commands.INTAKE_TEMP).value,
 				'maf': connection.query(obd.commands.MAF).value,
 				'throttlePos': connection.query(obd.commands.THROTTLE_POS).value,
-# 				'timingAdvance' : connection.query(obd.commands.TIMING_ADVANCE).value,
+				'timingAdvance' : connection.query(obd.commands.TIMING_ADVANCE).value,
 				'xG' : x,
 				'yG' : y,
 				'zG' : z,
-				'gpsTime' : gpsTime,
 				'gpsSpeed' : gpsSpeed,
 				'gpsLon' : gpsLon,
 				'gpsLat' : gpsLat,
@@ -192,12 +191,14 @@ def logData():
 			time.sleep(0.1)
 	
 	debug("Exiting logging data.")
+	GPIO.output(LED_PINS[1], 0)
 	connection.stop()
 	connection.close()
+	GPIO.output(LED_PINS[0], 0)
 		
 if __name__ == "__main__":
 	
-	setupDipSwitch()
+	setupGPIO()
 	accel = mma.MMA8451()
 	ismma = accel.check8451()
 	if ismma:
