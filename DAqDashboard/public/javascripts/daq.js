@@ -3,27 +3,93 @@ function getSelectedValue() {
 	return "/csv/" + file;
 }
 
-var dataPoints = [
-	{type: "engineLoad", name: "Engine Load", unit: "%"},
-	{type: "coolantTemp", name: "Coolant Temp", unit: "°C"},
-	{type: "rpm", name: "RPM", unit: "rpm"},
-	{type: "speed", name: "Speed", unit: "mph"},
-	{type: "intakeTemp", name: "Intake Temperature", unit: "°C"},
-	{type: "maf", name: "MAF", unit: "grams/sec"},
-	{type: "throttlePos", name: "Throttle Position", unit: "%"},
-	{type: "timingAdvance", name: "Timing Advance", unts: "° before TDC"},
-	//{type: "xG", name: "X-axis G-force", unit: "G"},
-	//{type: "yG", name: "Y-axis G-force", unit: "G"},
-	{type: "zG", name: "Z-axis G-force", unit: "G"},
-	{type: "gpsSpeed", name: "GPS Speed", unit: "mph"},
-	{type: "gpsLat", name: "Latitude", unit: "°"},
-	{type: "gpsLon", name: "Longitude", unit: "°"},
-	{type: "gpsAlt", name: "Altitude", unit: "Unknown"},
-	{type: "gpsClimb", name: "Climb", unit: "Unknown"}
-];
+var DataPoints = {
+	ENGINELOAD: {
+		type: "engineLoad",
+		name: "Engine Load",
+		unit: "%"
+	},
+	COOLANTTEMP: {
+		type: "coolantTemp",
+		name: "Coolant Temperature",
+		unit: "°C"
+	},
+	RPM: {
+		type: "rpm", 
+		name: "RPM", 
+		unit: "rpm"
+	},
+	OBDSPEED: {
+		type: "speed",
+		name: "OBD Speed",
+		unit: "mph"
+	},
+	INTAKETEMP: {
+		type: "intakeTemp",
+		name: "Intake Temperature",
+		unit: "°C"
+	},
+	MAF: {
+		type: "maf",
+		name: "MAF",
+		unit: "grams/sec"
+	},
+	THROTTLEPOS: {
+		type: "throttlePos",
+		name: "Throttle Position",
+		unit: "%"
+	},
+	TIMINGADV: {
+		type: "timingAdvance",
+		name: "Timing Advance",
+		unit: "° before TDC"
+	},
+	XG: {
+		type: "xG",
+		name: "X-axis G-force",
+		unit: "G"
+	},
+	YG: {
+		type: "yG",
+		name: "Y-axis G-force",
+		unit: "G"
+	},
+	ZG: {
+		type: "zG",
+		name: "Z-axis G-force",
+		unit: "G"
+	},
+	GPSSPEED: {
+		type: "gpsSpeed",
+		name: "GPS Speed",
+		unit: "mph"
+	},
+	LATITUDE: {
+		type: "gpsLat",
+		name: "Latitude",
+		unit: "°"
+	},
+	LONGITUDE: {
+		type: "gpsLon",
+		name: "Longitude",
+		unit: "°"
+	},
+	ALTITUDE: {
+		type: "gpsAlt",
+		name: "Altitude",
+		unit: "Unknown"
+	},
+	CLIMB: {
+		type: "gpsClimb",
+		name: "Climb",
+		unit: "Unknown"
+	}
+}
+
 var timeFormat = d3.time.format("%H:%M:%S.%L");
 var data;
 render();
+
 function render() {
 	var file = getSelectedValue();
 	d3.selectAll("svg").remove();
@@ -63,15 +129,11 @@ function render() {
 				left: 80
 			}
 		};
-		var engineLoadGraph = new Chart(params, data, "engineLoad");
-		engineLoadGraph.drawYLabel("Engine Load", "%");
-		var coolantTempGraph = new Chart(params, data, "coolantTemp");
-		coolantTempGraph.drawYLabel("Coolant Temperature", "°C");
-	}
-}
 
-function generateYAxis(dataPoint) {
-	var maxDomain = d3.max(data, function(d) { return d[dataPoint]});
-	var minDomain = d3.min(data, function(d) { return d[dataPoint]});
-	return d3.scale.linear().domain([minDomain, maxDomain]).range([height - MARGINS.top, MARGINS.bottom]);
+		var engineLoadGraph = new Chart(params, data, DataPoints.ENGINELOAD.type);
+		engineLoadGraph.drawYLabel(DataPoints.ENGINELOAD.name, DataPoints.ENGINELOAD.unit);
+		
+		var coolantTempGraph = new Chart(params, data, DataPoints.COOLANTTEMP.type);
+		coolantTempGraph.drawYLabel(DataPoints.COOLANTTEMP.name, DataPoints.COOLANTTEMP.unit);
+	}
 }
