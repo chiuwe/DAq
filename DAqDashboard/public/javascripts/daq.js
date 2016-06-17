@@ -132,7 +132,7 @@ function render() {
 
 		var engineLoadGraph = new Chart(params, data, DataPoints.ENGINELOAD.type);
 		engineLoadGraph.drawYLabel(DataPoints.ENGINELOAD.name, DataPoints.ENGINELOAD.unit);
-		
+
 		var coolantTempGraph = new Chart(params, data, DataPoints.COOLANTTEMP.type);
 		coolantTempGraph.drawYLabel(DataPoints.COOLANTTEMP.name, DataPoints.COOLANTTEMP.unit);
 	}
