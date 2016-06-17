@@ -9,7 +9,7 @@ from datetime import datetime
 
 MAX_SUPPORTED_COMMANDS = 52
 KPH_TO_MPH = 0.621371
-DEBUG = True
+DEBUG = False
 
 connection = None
 accel = None
@@ -18,12 +18,13 @@ session = None
 def debug(str):
 	if DEBUG:
 		print str
-		sys.stdout.flush()
 
 # Personal accelerometer orientation
 def orientateData(x, y, z):
 	return y, z, x
 
+
+# https://github.com/brendan-w/python-OBD/issues/31
 def initConnection():
 	global connection
 	while True:
@@ -33,8 +34,8 @@ def initConnection():
 			debug("connected")
 			if len(connection.supported_commands) >= MAX_SUPPORTED_COMMANDS:
 				debug("passed")
-				connection.watch(obd.commands.ENGINE_LOAD)
-				debug("ENGINE_LOAD")
+# 				connection.watch(obd.commands.ENGINE_LOAD)
+# 				debug("ENGINE_LOAD")
 				connection.watch(obd.commands.COOLANT_TEMP)
 				debug("COOLANT_TEMP")
 				connection.watch(obd.commands.RPM)
@@ -47,8 +48,8 @@ def initConnection():
 				debug("MAF")
 				connection.watch(obd.commands.THROTTLE_POS)
 				debug("THROTTLE_POS")
-				connection.watch(obd.commands.TIMING_ADVANCE)
-				debug("TIMING_ADVANCE")
+# 				connection.watch(obd.commands.TIMING_ADVANCE)
+# 				debug("TIMING_ADVANCE")
 				connection.start()
 				debug("OBD watchdog started!")
 				break
@@ -61,12 +62,12 @@ def initConnection():
 
 def logData():
 	filename = time.strftime("%Y%m%d%H%M.csv")
-	gpsSpeed = gpsLat = gpsLon = gpsAlt = gpsClimb = None
+	gpsTime = gpsSpeed = gpsLat = gpsLon = gpsAlt = gpsClimb = None
 	
 	debug(filename)
 	
 	with open(filename, 'w') as csvfile:
-		fieldnames = ['time', 'engineLoad', 'coolantTemp', 'rpm', 'speed', 'intakeTemp', 'maf', 'throttlePos', 'timingAdvance', 'xG', 'yG', 'zG', 'orientation', 'gpsSpeed', 'gpsLat', 'gpsLon', 'gpsAlt', 'gpsClimb']
+		fieldnames = ['time', 'coolantTemp', 'rpm', 'speed', 'intakeTemp', 'maf', 'throttlePos', 'xG', 'yG', 'zG', 'orientation', 'gpsTime', 'gpsSpeed', 'gpsLat', 'gpsLon', 'gpsAlt', 'gpsClimb']
 		writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 		writer.writeheader()
 		
@@ -81,6 +82,8 @@ def logData():
 			while report['class'] != 'TPV':
 				report = session.next()
 			if report['class'] == 'TPV':
+				if hasattr(report, 'time'):
+					gpsTime = report.time
 				if hasattr(report, 'speed'):
 					gpsSpeed = report.speed * gps.MPS_TO_MPH
 				if hasattr(report, 'lat'):
@@ -97,17 +100,18 @@ def logData():
 			rpm = connection.query(obd.commands.RPM).value
 			writer.writerow(
 				{'time': timestamp,
-				'engineLoad': connection.query(obd.commands.ENGINE_LOAD).value,
+# 				'engineLoad': connection.query(obd.commands.ENGINE_LOAD).value,
 				'coolantTemp': connection.query(obd.commands.COOLANT_TEMP).value,
 				'rpm': rpm,
 				'speed': (connection.query(obd.commands.SPEED).value * KPH_TO_MPH),
 				'intakeTemp': connection.query(obd.commands.INTAKE_TEMP).value,
 				'maf': connection.query(obd.commands.MAF).value,
 				'throttlePos': connection.query(obd.commands.THROTTLE_POS).value,
-				'timingAdvance' : connection.query(obd.commands.TIMING_ADVANCE).value,
+# 				'timingAdvance' : connection.query(obd.commands.TIMING_ADVANCE).value,
 				'xG' : x,
 				'yG' : y,
 				'zG' : z,
+				'gpsTime' : gpsTime,
 				'gpsSpeed' : gpsSpeed,
 				'gpsLon' : gpsLon,
 				'gpsLat' : gpsLat,
