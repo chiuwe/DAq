@@ -61,12 +61,12 @@ def initConnection():
 
 def logData():
 	filename = time.strftime("%Y%m%d%H%M.csv")
-	gpsSpeed = gpsLat = gpsLon = gpsAlt = gpsClimb = None
+	gpsTime = gpsSpeed = gpsLat = gpsLon = gpsAlt = gpsClimb = None
 	
 	debug(filename)
 	
 	with open(filename, 'w') as csvfile:
-		fieldnames = ['time', 'engineLoad', 'coolantTemp', 'rpm', 'speed', 'intakeTemp', 'maf', 'throttlePos', 'timingAdvance', 'xG', 'yG', 'zG', 'orientation', 'gpsSpeed', 'gpsLat', 'gpsLon', 'gpsAlt', 'gpsClimb']
+		fieldnames = ['time', 'engineLoad', 'coolantTemp', 'rpm', 'speed', 'intakeTemp', 'maf', 'throttlePos', 'timingAdvance', 'xG', 'yG', 'zG', 'orientation', 'gpsTime', 'gpsSpeed', 'gpsLat', 'gpsLon', 'gpsAlt', 'gpsClimb']
 		writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 		writer.writeheader()
 		
@@ -81,6 +81,8 @@ def logData():
 			while report['class'] != 'TPV':
 				report = session.next()
 			if report['class'] == 'TPV':
+				if hasattr(report, 'time'):
+					gpsTime = report.time
 				if hasattr(report, 'speed'):
 					gpsSpeed = report.speed * gps.MPS_TO_MPH
 				if hasattr(report, 'lat'):
@@ -108,6 +110,7 @@ def logData():
 				'xG' : x,
 				'yG' : y,
 				'zG' : z,
+				'gpsTime' : gpsTime,
 				'gpsSpeed' : gpsSpeed,
 				'gpsLon' : gpsLon,
 				'gpsLat' : gpsLat,
