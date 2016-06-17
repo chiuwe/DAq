@@ -9,30 +9,30 @@ from datetime import datetime
 
 # Global Constants
 ORIENTATION_MAPPING = {
-	0b010100: lambda x, y, z: (x, y, z),
-	0b010101: lambda x, y, z: (-x, y, -z),
-	0b011100: lambda x, y, z: (-y, x, z),
-	0b011101: lambda x, y, z: (y, x, -z),
-	0b100100: lambda x, y, z: (-x, -y, z),
-	0b100101: lambda x, y, z: (x, -y, -z),
-	0b101100: lambda x, y, z: (y, -x, z),
-	0b101101: lambda x, y, z: (-y, -x, -z),
-	0b00000: lambda x, y, z: (-x, -z, -y),
-	0b00001: lambda x, y, z: (x, -z, y),
-	0b00010: lambda x, y, z: (-y, -z, x),
-	0b00011: lambda x, y, z: (y, -z, -x),
-	0b00100: lambda x, y, z: (x, z, -y),
-	0b00101: lambda x, y, z: (-x, z, y),
-	0b00110: lambda x, y, z: (y, z, x),
-	0b00111: lambda x, y, z: (-y, z, -x),
-	0b01010: lambda x, y, z: (-z, y, x),
-	0b01011: lambda x, y, z: (z, y, -x),
-	0b01100: lambda x, y, z: (z, x, -y),
-	0b01101: lambda x, y, z: (-z, x, y),
-	0b10010: lambda x, y, z: (z, -y, x),
-	0b10011: lambda x, y, z: (-z, -y, x),
-	0b10100: lambda x, y, z: (-z, -x, -y),
-	0b10101: lambda x, y, z: (z, -x, y)
+	0b101010: lambda x, y, z: (x, y, z),
+	0b101011: lambda x, y, z: (-x, y, -z),
+	0b101000: lambda x, y, z: (-y, x, z),
+	0b101001: lambda x, y, z: (y, x, -z),
+	0b100110: lambda x, y, z: (-x, -y, z),
+	0b100111: lambda x, y, z: (x, -y, -z),
+	0b100100: lambda x, y, z: (y, -x, z),
+	0b100101: lambda x, y, z: (-y, -x, -z),
+	0b11100: lambda x, y, z: (-x, -z, -y),
+	0b11101: lambda x, y, z: (x, -z, y),
+	0b11110: lambda x, y, z: (-y, -z, x),
+	0b11111: lambda x, y, z: (y, -z, -x),
+	0b11000: lambda x, y, z: (x, z, -y),
+	0b11001: lambda x, y, z: (-x, z, y),
+	0b11010: lambda x, y, z: (y, z, x),
+	0b11011: lambda x, y, z: (-y, z, -x),
+	0b10110: lambda x, y, z: (-z, y, x),
+	0b10111: lambda x, y, z: (z, y, -x),
+	0b10000: lambda x, y, z: (z, x, -y),
+	0b10001: lambda x, y, z: (-z, x, y),
+	0b01110: lambda x, y, z: (z, -y, x),
+	0b01111: lambda x, y, z: (-z, -y, x),
+	0b01000: lambda x, y, z: (-z, -x, -y),
+	0b01001: lambda x, y, z: (z, -x, y)
 }
 
 MAX_SUPPORTED_COMMANDS = 52
@@ -40,8 +40,8 @@ KPH_TO_MPH = 0.621371
 DIP_IO = [13, 16, 19]
 PL_MASK = 0b11
 PL_BITS = 2
-BAFRO = 0b10
-BAFRO_SHIFT = 3
+BAFRO = 0b100000
+BAFRO_THRES = 0.5
 DEBUG = False
 
 # Global Variables
@@ -71,21 +71,28 @@ def setupDataOrientation():
 	key = 0
 	dipSetBits = 0
 	bitShift = 0
-	mmaOr = mma.getOrientation()
-	x, y, z = mma.readScaledData()
+	mmaOr = accel.getOrientation()
+	x, y, z = accel.readScaledData()
 	
+	debug("mmaOr: " + bin(mmaOr))
+	debug("(" + str(x) + ", " + str(y) + ", " + str(z) + ")")
 	for i in DIP_IO:
-		dipSetBits = dipSetBits | (GPIO.in(i) << bitShift)
+		dipSetBits = dipSetBits | (GPIO.input(i) << bitShift)
 		bitShift += 1
-	if abs(z) > abs(x) | abs(z) > abs(y):
-		key = (dipSetBits << BAFRO_SHIFT) | (mmaOr & 1) | BAFRO
+	debug("dipSetBits: " + bin(dipSetBits))
+	if abs(z) > BAFRO_THRES:
+		debug("front/back")
+		key = (dipSetBits << 1) | (mmaOr & 1) | BAFRO
 	else:
+		debug("PL")
 		key = (dipSetBits << PL_BITS) | (mmaOr >> 1 & PL_MASK)
-	transform = ORIENTATION_MAPPING[key]
-
-# TODO: Remove if setupDataOrientation works
-def oritentateData(x, y, z):
-	return -z, y, -x
+	debug("key: " + bin(key))
+	transform = ORIENTATION_MAPPING.get(key)
+	
+# Set to personal default if key not found	
+	if transform == None:
+		print "key not found: " + bin(key)
+		transform = lambda x, y, z: (-y, z, -x)
 
 def initConnection():
 	global connection
@@ -191,6 +198,7 @@ if __name__ == "__main__":
 	else:
 		debug("No MMA Found.")
 	accel.setup()
+ 	time.sleep(0.1)
 	setupDataOrientation()
 	
 	session = gps.gps("localhost", "2947")
