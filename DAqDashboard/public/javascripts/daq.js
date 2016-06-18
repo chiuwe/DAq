@@ -163,6 +163,7 @@ function render() {
 				temp = [];
 			}
 		}
+		data2[lap] = temp;
 	}
 
 	function processData() {
