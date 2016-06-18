@@ -15,6 +15,7 @@ function Chart(params, data, dataPoint) {
 	this.svg = d3.select("main").append("svg")
 		.attr("width", this.WIDTH + this.MARGINS.left + this.MARGINS.right)
 		.attr("height", this.HEIGHT + this.MARGINS.top + this.MARGINS.bottom);
+	
 	// X-axis
 	this.svg.append("svg:g")
 			.attr('stroke-width', 1)
@@ -25,6 +26,7 @@ function Chart(params, data, dataPoint) {
 		.attr("y", this.HEIGHT + this.MARGINS.bottom)
 		.style("text-anchor", "middle")
 		.text("Time");
+	
 	// Y-axis
 	this.svg.append("svg:g")
 			.attr('transform', 'translate(' + this.MARGINS.left + ',0)')
@@ -34,26 +36,8 @@ function Chart(params, data, dataPoint) {
 	var line = this.svg.append('svg:path')
 		.attr('d', lineFunc(this.data))
 		.attr("class", "line");
-/*
-	// tooltip
-	var self = this;
-	this.tooltip = this.svg.append("g")
-		.attr("class", "tooltip")
-		.style("display", "none");
-	this.tooltip.append("circle")
-		.attr("fill", "red")
-		.attr("r", 3);
-	this.tooltip.append("text")
-		.attr("x", 7)
-		.attr("dy", ".35em");
-	this.svg.append("rect")
-		.attr("class", "overlay")
-		.attr("width", this.WIDTH + this.MARGINS.left + this.MARGINS.right)
-		.attr("height", this.HEIGHT + this.MARGINS.top + this.MARGINS.bottom)
-		.on("mouseover", function() { self.tooltip.style("display", null); })
-		.on("mouseout", function() { self.tooltip.style("display", "none"); })
-		.on("mousemove", function() { self.mouseMove(this); });
-*/
+
+	// Tooltip
 	if (params.tooltip == true) {
 		this.buildTooltip();		
 	}
@@ -91,18 +75,6 @@ Chart.prototype.drawYLabel = function(name, unit) {
 		.text(name + " (" + unit + ")");
 };
 
-Chart.prototype.bisectTime = d3.bisector(function(d) { return d.time; }).left;
-
-Chart.prototype.mouseMove = function(svgObj) {
-	var xPos = this.xScale.invert(d3.mouse(svgObj)[0]);
-	var i = this.bisectTime(this.data, xPos);
-	var d0 = this.data[i-1];
-	var d1 = this.data[i];
-	var d = xPos - d0.time > d1.time - xPos ? d1: d0;
-	this.tooltip.attr("transform", "translate(" + this.xScale(d.time) + "," + this.yScale(d[this.dataPoint]) + ")");
-	this.tooltip.select("text").text(d[this.dataPoint]);
-}
-
 Chart.prototype.buildTooltip = function() {
 	var self = this;
 	this.tooltip = this.svg.append("g")
@@ -121,4 +93,16 @@ Chart.prototype.buildTooltip = function() {
 		.on("mouseover", function() { self.tooltip.style("display", null); })
 		.on("mouseout", function() { self.tooltip.style("display", "none"); })
 		.on("mousemove", function() { self.mouseMove(this); });
+};
+
+Chart.prototype.bisectTime = d3.bisector(function(d) { return d.time; }).left;
+
+Chart.prototype.mouseMove = function(svgObj) {
+	var xPos = this.xScale.invert(d3.mouse(svgObj)[0]);
+	var i = this.bisectTime(this.data, xPos);
+	var d0 = this.data[i-1];
+	var d1 = this.data[i];
+	var d = xPos - d0.time > d1.time - xPos ? d1: d0;
+	this.tooltip.attr("transform", "translate(" + this.xScale(d.time) + "," + this.yScale(d[this.dataPoint]) + ")");
+	this.tooltip.select("text").text(d[this.dataPoint]);
 };
