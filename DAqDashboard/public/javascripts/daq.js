@@ -120,14 +120,15 @@ function render() {
 
 	function processData() {
 		var params = {
-			"width": 1000,
-			"height": 200,
-			"margins": {
+			width: 1000,
+			height: 200,
+			margins: {
 				top: 20,
 				right: 20,
 				bottom: 20,
 				left: 80
-			}
+			},
+			tooltip: true
 		};
 
 		var engineLoadGraph = new Chart(params, data, DataPoints.ENGINELOAD.type);

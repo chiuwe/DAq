@@ -34,7 +34,7 @@ function Chart(params, data, dataPoint) {
 	var line = this.svg.append('svg:path')
 		.attr('d', lineFunc(this.data))
 		.attr("class", "line");
-
+/*
 	// tooltip
 	var self = this;
 	this.tooltip = this.svg.append("g")
@@ -53,6 +53,10 @@ function Chart(params, data, dataPoint) {
 		.on("mouseover", function() { self.tooltip.style("display", null); })
 		.on("mouseout", function() { self.tooltip.style("display", "none"); })
 		.on("mousemove", function() { self.mouseMove(this); });
+*/
+	if (params.tooltip == true) {
+		this.buildTooltip();		
+	}
 }
 
 Chart.prototype.generateXScale = function(dataPoint) {
@@ -88,6 +92,7 @@ Chart.prototype.drawYLabel = function(name, unit) {
 };
 
 Chart.prototype.bisectTime = d3.bisector(function(d) { return d.time; }).left;
+
 Chart.prototype.mouseMove = function(svgObj) {
 	var xPos = this.xScale.invert(d3.mouse(svgObj)[0]);
 	var i = this.bisectTime(this.data, xPos);
@@ -97,3 +102,23 @@ Chart.prototype.mouseMove = function(svgObj) {
 	this.tooltip.attr("transform", "translate(" + this.xScale(d.time) + "," + this.yScale(d[this.dataPoint]) + ")");
 	this.tooltip.select("text").text(d[this.dataPoint]);
 }
+
+Chart.prototype.buildTooltip = function() {
+	var self = this;
+	this.tooltip = this.svg.append("g")
+		.attr("class", "tooltip")
+		.style("display", "none");
+	this.tooltip.append("circle")
+		.attr("fill", "red")
+		.attr("r", 3);
+	this.tooltip.append("text")
+		.attr("x", 7)
+		.attr("dy", ".35em");
+	this.svg.append("rect")
+		.attr("class", "overlay")
+		.attr("width", this.WIDTH + this.MARGINS.left + this.MARGINS.right)
+		.attr("height", this.HEIGHT + this.MARGINS.top + this.MARGINS.bottom)
+		.on("mouseover", function() { self.tooltip.style("display", null); })
+		.on("mouseout", function() { self.tooltip.style("display", "none"); })
+		.on("mousemove", function() { self.mouseMove(this); });
+};
