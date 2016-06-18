@@ -24,6 +24,8 @@ def debug(str):
 def orientateData(x, y, z):
 	return y, z, x
 
+
+# https://github.com/brendan-w/python-OBD/issues/31
 def initConnection():
 	global connection
 	while True:
@@ -33,8 +35,8 @@ def initConnection():
 			debug("connected")
 			if len(connection.supported_commands) >= MAX_SUPPORTED_COMMANDS:
 				debug("passed")
-				connection.watch(obd.commands.ENGINE_LOAD)
-				debug("ENGINE_LOAD")
+# 				connection.watch(obd.commands.ENGINE_LOAD)
+# 				debug("ENGINE_LOAD")
 				connection.watch(obd.commands.COOLANT_TEMP)
 				debug("COOLANT_TEMP")
 				connection.watch(obd.commands.RPM)
@@ -47,8 +49,8 @@ def initConnection():
 				debug("MAF")
 				connection.watch(obd.commands.THROTTLE_POS)
 				debug("THROTTLE_POS")
-				connection.watch(obd.commands.TIMING_ADVANCE)
-				debug("TIMING_ADVANCE")
+# 				connection.watch(obd.commands.TIMING_ADVANCE)
+# 				debug("TIMING_ADVANCE")
 				connection.start()
 				debug("OBD watchdog started!")
 				break
