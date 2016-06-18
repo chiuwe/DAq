@@ -1,9 +1,11 @@
 import obd
 import time
 import csv
+import gps
+import sys
+import logging
 import smbus
 import MMA8451 as mma
-import gps
 import RPi.GPIO as GPIO
 from datetime import datetime
 
@@ -43,7 +45,7 @@ PL_MASK = 0b11
 PL_BITS = 2
 BAFRO = 0b100000
 BAFRO_THRES = 0.5
-DEBUG = True
+DEBUG = False
 
 # Global Variables
 connection = None
@@ -93,12 +95,12 @@ def setupDataOrientation():
 	debug("key: " + bin(key))
 	transform = ORIENTATION_MAPPING.get(key)
 	
-# Set to personal default if key not found	
+	# Set to personal default if key not found	
 	if transform == None:
-		print "key not found: " + bin(key)
+		logging.warning("key not found: " + bin(key))
 		transform = lambda x, y, z: (-y, z, -x)
-
-def initConnection():
+		
+def connectOBD():
 	global connection
 	while True:
 		try:
@@ -129,9 +131,16 @@ def initConnection():
 			connection.close()
 			time.sleep(1)
 		except (KeyboardInterrupt, SystemExit):
+			GPIO.cleanup()
 			raise
 		except:
 			pass
+
+def disconnectOBD():
+	GPIO.output(LED_PINS[1], 0)
+	connection.stop()
+	connection.close()
+	GPIO.output(LED_PINS[0], 0)
 
 def logData():
 	filename = time.strftime("%Y%m%d%H%M.csv")
@@ -191,14 +200,19 @@ def logData():
 			time.sleep(0.1)
 	
 	debug("Exiting logging data.")
-	GPIO.output(LED_PINS[1], 0)
-	connection.stop()
-	connection.close()
-	GPIO.output(LED_PINS[0], 0)
+	disconnectOBD()
 		
 if __name__ == "__main__":
 	
+	if len(sys.argv) == 2:
+		DEBUG = sys.argv[1]
+	
 	setupGPIO()
+	logging.basicConfig(level=logging.DEBUG,
+								format='%(asctime)s %(levelname)-8s %(message)s',
+								datefmt='%m-%d %H:%M',
+								filename="exception.log")
+	
 	accel = mma.MMA8451()
 	ismma = accel.check8451()
 	if ismma:
@@ -215,5 +229,9 @@ if __name__ == "__main__":
 		session.next()
 	
 	while True:
-		initConnection()
-		logData()
+		connectOBD()
+		try:
+			logData()
+		except:
+			disconnectOBD()
+			logging.exception("logData:")
