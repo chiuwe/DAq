@@ -68,7 +68,7 @@ def logData():
 	debug(filename)
 	
 	with open(filename, 'w') as csvfile:
-		fieldnames = ['time', 'engineLoad', 'coolantTemp', 'rpm', 'speed', 'intakeTemp', 'maf', 'throttlePos', 'timingAdvance', 'xG', 'yG', 'zG', 'orientation', 'gpsTime', 'gpsSpeed', 'gpsLat', 'gpsLon', 'gpsAlt', 'gpsClimb']
+		fieldnames = ['time', 'coolantTemp', 'rpm', 'speed', 'intakeTemp', 'maf', 'throttlePos', 'xG', 'yG', 'zG', 'orientation', 'gpsTime', 'gpsSpeed', 'gpsLat', 'gpsLon', 'gpsAlt', 'gpsClimb']
 		writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 		writer.writeheader()
 		
@@ -101,14 +101,14 @@ def logData():
 			rpm = connection.query(obd.commands.RPM).value
 			writer.writerow(
 				{'time': timestamp,
-				'engineLoad': connection.query(obd.commands.ENGINE_LOAD).value,
+# 				'engineLoad': connection.query(obd.commands.ENGINE_LOAD).value,
 				'coolantTemp': connection.query(obd.commands.COOLANT_TEMP).value,
 				'rpm': rpm,
 				'speed': (connection.query(obd.commands.SPEED).value * KPH_TO_MPH),
 				'intakeTemp': connection.query(obd.commands.INTAKE_TEMP).value,
 				'maf': connection.query(obd.commands.MAF).value,
 				'throttlePos': connection.query(obd.commands.THROTTLE_POS).value,
-				'timingAdvance' : connection.query(obd.commands.TIMING_ADVANCE).value,
+# 				'timingAdvance' : connection.query(obd.commands.TIMING_ADVANCE).value,
 				'xG' : x,
 				'yG' : y,
 				'zG' : z,
