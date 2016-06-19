@@ -137,8 +137,8 @@ LineChart.prototype.drawPlot = function() {
 
 // GPS CHART ==================================================================
 
-function GPSChart(params, data) {
-	Chart.call(this, params, data, geo);
+function GPSChart(params, data, geo) {
+	Chart.call(this, params, data);
 
 	this.geo = geo;
 	
@@ -169,8 +169,8 @@ function GPSChart(params, data) {
 	var ppath = this.svg.append("path")
 		.datum(geo)
 		.attr("d", this.path)
-		.attr("class", "line")
-		.call(transition);
+		.attr("class", "line");
+		// .call(transition);
 	// console.log(ppath);
 	// var self = this;
 	// this.svg.selectAll("circle")
@@ -181,25 +181,25 @@ function GPSChart(params, data) {
 	// 	.attr("r", "3px")
 	// 	.attr("fill", "red")
 
-	this.marker = this.svg.append("circle")
-		.attr("r", 3)
-		.attr("fill", "red")
-		.attr("id", "marker")
-		.attr("transform", "translate("+this.projection(this.geo.coordinates[0])[0]+","+this.projection(this.geo.coordinates[0])[1]+")");
-	function transition(path) {
-		path.transition()
-			.duration(30000)
-			.attrTween("stroke", tweenDash);
-	}
-	function tweenDash() {
-		var l = ppath.node().getTotalLength();
-    	return function(t) {
-	      var marker = d3.select("#marker");
-	      var p = ppath.node().getPointAtLength(t * l);
-	      marker.attr("transform", "translate(" + p.x + "," + p.y + ")");
-	      return "black";
-	    }
-	}
+	// this.marker = this.svg.append("circle")
+	// 	.attr("r", 3)
+	// 	.attr("fill", "red")
+	// 	.attr("id", "marker")
+	// 	.attr("transform", "translate("+this.projection(this.geo.coordinates[0])[0]+","+this.projection(this.geo.coordinates[0])[1]+")");
+	// function transition(path) {
+	// 	path.transition()
+	// 		.duration(30000)
+	// 		.attrTween("stroke", tweenDash);
+	// }
+	// function tweenDash() {
+	// 	var l = ppath.node().getTotalLength();
+ //    	return function(t) {
+	//       var marker = d3.select("#marker");
+	//       var p = ppath.node().getPointAtLength(t * l);
+	//       marker.attr("transform", "translate(" + p.x + "," + p.y + ")");
+	//       return "black";
+	//     }
+	// }
 }
 
 GPSChart.prototype = Object.create(Chart.prototype);
