@@ -1,8 +1,3 @@
-function getSelectedValue() {
-	var file = document.getElementById("files").value;
-	return "/csv/" + file;
-}
-
 var DataPoints = {
 	ENGINELOAD: {
 		type: "engineLoad",
@@ -85,16 +80,27 @@ var DataPoints = {
 		unit: "Unknown"
 	}
 }
-
 var timeFormat = d3.time.format("%H:%M:%S.%L");
 var data;
-render();
+var geo = {
+	type: "LineString",
+	coordinates: []
+};
+
+function getSelectedValue() {
+	var file = document.getElementById("files").value;
+	return "/csv/" + file;
+}
 
 function render() {
-	var file = getSelectedValue();
 	d3.selectAll("svg").remove();
+	geo.coordinates = [];
+
+	var file = getSelectedValue();
 	d3.csv(file)
-		.row(function(d) {return {
+		.row(function(d) {
+			geo.coordinates.push([+d.gpsLon, +d.gpsLat]);
+			return {
 			time: timeFormat.parse(d.time.replace(/(\.[0-9]{3})[0-9]*/, "$1")),
 			engineLoad: +d.engineLoad,
 			coolantTemp: +d.coolantTemp,
@@ -131,10 +137,23 @@ function render() {
 			tooltip: true
 		};
 
-		var engineLoadGraph = new Chart(params, data, DataPoints.ENGINELOAD.type);
-		engineLoadGraph.drawYLabel(DataPoints.ENGINELOAD.name, DataPoints.ENGINELOAD.unit);
+		// var engineLoadGraph = new LineChart(params, data, DataPoints.ENGINELOAD);
 
-		var coolantTempGraph = new Chart(params, data, DataPoints.COOLANTTEMP.type);
-		coolantTempGraph.drawYLabel(DataPoints.COOLANTTEMP.name, DataPoints.COOLANTTEMP.unit);
+		// var coolantTempGraph = new LineChart(params, data, DataPoints.COOLANTTEMP.type);
+
+		var gpsParams = {
+			width: 500,
+			height: 500,
+			margins: {
+				top: 0,
+				right: 0,
+				bottom: 0,
+				left: 0
+			},
+			tooltip: true
+		}
+		var gpsChart = new GPSChart(gpsParams, data, geo);
 	}
 }
+
+render();
