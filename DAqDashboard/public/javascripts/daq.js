@@ -151,19 +151,29 @@ function render() {
 		// maybe should show error message that track info doesn't exist?
 		if (track == null) {return}
 		
+		i = 0;
 		p1 = new point(track.x1, track.y1);
 		p2 = new point(track.x2, track.y2);
-		for (x = 0; x < data.length - 1; x++) {
-			p3 = new point(data[x].gpsLon, data[x].gpsLat);
-			p4 = new point(data[x+1].gpsLon, data[x+1].gpsLat);
-			temp.push(data[x])
+		p3 = new point(data[i].gpsLon, data[i].gpsLat);
+		p4 = new point(data[i+1].gpsLon, data[i+1].gpsLat);
+		
+		while (i < data.length - 2 & !isIntersect(p1, p2, p3, p4)) {
+			i++;
+			p3 = new point(data[i].gpsLon, data[i].gpsLat);
+			p4 = new point(data[i+1].gpsLon, data[i+1].gpsLat);
+		}
+		
+		while (i < data.length - 2) {
+			i++;
+			p3 = new point(data[i].gpsLon, data[i].gpsLat);
+			p4 = new point(data[i+1].gpsLon, data[i+1].gpsLat);
+			temp.push(data[i]);
 			if (isIntersect(p1, p2, p3, p4)) {
 				data2[lap] = temp;
 				lap++;
 				temp = [];
 			}
 		}
-		data2[lap] = temp;
 	}
 
 	function processData() {
