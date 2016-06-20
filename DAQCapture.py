@@ -9,7 +9,7 @@ from datetime import datetime
 
 MAX_SUPPORTED_COMMANDS = 52
 KPH_TO_MPH = 0.621371
-DEBUG = True
+DEBUG = False
 
 connection = None
 accel = None
@@ -18,7 +18,6 @@ session = None
 def debug(str):
 	if DEBUG:
 		print str
-		sys.stdout.flush()
 
 # Personal accelerometer orientation
 def orientateData(x, y, z):
