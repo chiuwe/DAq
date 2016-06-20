@@ -1,4 +1,5 @@
 var splitLaps;
+var track;
 
 function CCW(p1, p2, p3) {
   a = p1.lon; b = p1.lat; 
@@ -71,7 +72,6 @@ function processLaps() {
 	temp = [];
 	splitLaps = [];
 	i = 0;
-	var track;
 	
 	// find track
 	while(track == null && i < data.length) {
