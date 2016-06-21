@@ -151,6 +151,85 @@ LineChart.prototype.drawPlot = function() {
 		.attr("stroke", "#333");
 };
 
+// MULTI-LINE CHART ===========================================================
+
+function MultiLineChart(params, data, dataPoint) {
+	Chart.call(this, params, data);
+
+	this.svg = d3.select("main").append("svg")
+		.attr("width", this.WIDTH + this.MARGINS.left + this.MARGINS.right)
+		.attr("height", this.HEIGHT + this.MARGINS.top + this.MARGINS.bottom);
+	this.params = params;
+	this.dataPoint = dataPoint;
+	if (params.relativeTime == true) {
+		var start = data[0].time;
+		for (x in data) {
+			data[x].relativeTime = data[x].time.getTime() - start.getTime();
+		}
+		this.xScale = this.generateXScale("relativeTime");
+	} else {
+		this.xScale = this.generateXScale("time");
+	}
+	this.xScale.tickFormat(d3.time.format("%M:%S.%L"));
+	this.xAxis = d3.svg.axis().scale(this.xScale);
+	this.yScale = this.generateYScale(this.dataPoint.type);
+	this.yAxis = d3.svg.axis().scale(this.yScale).orient("left");
+
+	this.drawXAxis();
+	this.drawYAxis();
+	this.drawXLabel("Time");
+	this.drawYLabel(this.dataPoint.name, this.dataPoint.unit);
+
+	this.plots = []
+	for (x in this.data) {
+		this.plots[x] = new LinePlot(this, this.data[x], x);
+	}
+
+	function LinePlot(parent, data, x) {
+		var parent = parent;
+		this.lineFunc = parent.generateLineFunction();
+		this.line = parent.svg.append("path")
+			.attr("d", this.lineFunc(data))
+			.attr("class", "line")
+			.attr("stroke", Colors[x]);
+		return this.line
+	}
+}
+
+MultiLineChart.prototype = Object.create(LineChart.prototype);
+
+MultiLineChart.prototype.drawPlot = function(data) {
+	var lineFunc = this.generateLineFunction();
+	var line = this.svg.append('svg:path')
+		.attr('d', lineFunc(data))
+		.attr("class", "line")
+		.attr("stroke", "#333");
+};
+
+MultiLineChart.prototype.generateXScale = function(dataPoint) {
+	var maxDomain;
+	var minDomain;
+	for (x in this.data) {
+		var tempMin = d3.min(this.data[x], function(d) { return d[dataPoint]; });
+		var tempMax = d3.max(this.data[x], function(d) { return d[dataPoint]; });
+		if (minDomain == undefined || tempMin < minDomain) { minDomain = tempMin; }
+		if (maxDomain == undefined || tempMax > maxDomain) { maxDomain = tempMax; }
+	}
+	return d3.time.scale().domain([minDomain, maxDomain]).range([this.MARGINS.left, this.WIDTH + this.MARGINS.left - this.MARGINS.right]);
+};
+
+MultiLineChart.prototype.generateYScale = function(dataPoint) {
+	var maxDomain;
+	var minDomain;
+	for (x in this.data) {
+		var tempMin = d3.min(this.data[x], function(d) { return d[dataPoint]; });
+		var tempMax = d3.max(this.data[x], function(d) { return d[dataPoint]; });
+		if (minDomain == undefined || tempMin < minDomain) { minDomain = tempMin; }
+		if (maxDomain == undefined || tempMax > maxDomain) { maxDomain = tempMax; }
+	}
+	return d3.scale.linear().domain([minDomain, maxDomain]).range([this.HEIGHT - this.MARGINS.top, this.MARGINS.bottom]);
+};
+
 // GPS CHART ==================================================================
 
 function GPSChart(track, params, data, geo) {

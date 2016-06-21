@@ -254,7 +254,7 @@ function processLaps() {
 
 function processData() {
 	var params = {
-		width: 1000,
+		width: 900,
 		height: 200,
 		margins: {
 			top: 20,
@@ -289,7 +289,15 @@ function processData() {
 		tooltip: true
 	}
 	var gpsChart = new GPSChart(track, gpsParams, splitLaps, splitGeo);	
-	console.log(splitLaps.length);
+
+	var engineLoadGraph = new MultiLineChart(params, splitLaps, DataPoints.ENGINELOAD);
+	var coolantTempGraph = new MultiLineChart(params, splitLaps, DataPoints.COOLANTTEMP);
+	var rpmGraph = new MultiLineChart(params, splitLaps, DataPoints.RPM);
+	var obdSpeedGraph = new MultiLineChart(params, splitLaps, DataPoints.OBDSPEED);
+	var intakeTempGraph = new MultiLineChart(params, splitLaps, DataPoints.INTAKETEMP);
+	var mafGraph = new MultiLineChart(params, splitLaps, DataPoints.MAF);
+	var throttlePosGraph = new MultiLineChart(params, splitLaps, DataPoints.THROTTLEPOS);
+	var timingAdvanceGraph = new MultiLineChart(params, splitLaps, DataPoints.TIMINGADV); 
 }
 
 render();

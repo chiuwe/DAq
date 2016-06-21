@@ -12,23 +12,36 @@ header * {
 	padding-right: 2em;
 }
 
+main {
+  float: left;
+  width: 900px;
+  /*border: 1px solid red;*/
+}
+
 sidebar {
   display: block;
   width: 375px;
+  float: left;
+  /*border: 1px solid blue;*/
 }
 
 ul.legend {
   list-style-type: none;
   margin: 0;
   padding: 0;
+  border-radius: 5px;
+  display: inline-block;
+  overflow: hidden;
 }
 
 ul.legend li {
   display: inline-block;
-  margin: 0 5px;
-  padding: 2px 4px;
+  padding: 4px;
   color: #eee;
-  border-radius: 2px;
+}
+
+svg {
+  display: inline-block;
 }
 
 path {
