@@ -43,6 +43,7 @@ Chart.prototype.drawYLabel = function(name, unit) {
 		.attr("transform", "rotate(-90)")
 		.attr("x", 0 - (this.HEIGHT / 2))
 		.attr("dy", "1em")
+		.style("font-size", "0.8em")
 		.style("text-anchor", "middle")
 		.text(labelText);
 };
@@ -81,7 +82,7 @@ Chart.prototype.mouseMove = function(svgObj) {
 
 // LINE CHART =================================================================
 
-function LineChart(params, data, dataPoint) {
+function SingleLineChart(params, data, dataPoint) {
 	Chart.call(this, params, data);
 
 	this.svg = d3.select("main").append("svg")
@@ -113,22 +114,22 @@ function LineChart(params, data, dataPoint) {
 	}
 }
 
-LineChart.prototype = Object.create(Chart.prototype);
+SingleLineChart.prototype = Object.create(Chart.prototype);
 
-LineChart.prototype.drawXAxis = function() {
+SingleLineChart.prototype.drawXAxis = function() {
 	this.svg.append("svg:g")
 			.attr('stroke-width', 1)
 			.attr('transform', 'translate(0,' + (this.HEIGHT - this.MARGINS.bottom) + ')')
 			.call(this.xAxis);
 };
 
-LineChart.prototype.drawYAxis = function() {
+SingleLineChart.prototype.drawYAxis = function() {
 	this.svg.append("svg:g")
 			.attr('transform', 'translate(' + this.MARGINS.left + ',0)')
 			.call(this.yAxis);
 };
 
-LineChart.prototype.generateLineFunction = function() {
+SingleLineChart.prototype.generateLineFunction = function() {
 	var self = this;
 	var x;
 	if (this.params.relativeTime == true) {
@@ -143,7 +144,7 @@ LineChart.prototype.generateLineFunction = function() {
 		});
 };
 
-LineChart.prototype.drawPlot = function() {
+SingleLineChart.prototype.drawPlot = function() {
 	var lineFunc = this.generateLineFunction();
 	var line = this.svg.append('svg:path')
 		.attr('d', lineFunc(this.data))
@@ -179,7 +180,7 @@ function MultiLineChart(params, data, dataPoint) {
 
 	this.drawXAxis();
 	this.drawYAxis();
-	this.drawXLabel("Time");
+	// this.drawXLabel("Time");
 	this.drawYLabel(this.dataPoint.name, this.dataPoint.unit);
 
 	this.plots = []
@@ -198,15 +199,7 @@ function MultiLineChart(params, data, dataPoint) {
 	}
 }
 
-MultiLineChart.prototype = Object.create(LineChart.prototype);
-
-MultiLineChart.prototype.drawPlot = function(data) {
-	var lineFunc = this.generateLineFunction();
-	var line = this.svg.append('svg:path')
-		.attr('d', lineFunc(data))
-		.attr("class", "line")
-		.attr("stroke", "#333");
-};
+MultiLineChart.prototype = Object.create(SingleLineChart.prototype);
 
 MultiLineChart.prototype.generateXScale = function(dataPoint) {
 	var maxDomain;

@@ -260,8 +260,8 @@ function processData() {
 		margins: {
 			top: 20,
 			right: 20,
-			bottom: 20,
-			left: 80
+			bottom: 5,
+			left: 60
 		},
 		tooltip: true,
 		relativeTime: true
