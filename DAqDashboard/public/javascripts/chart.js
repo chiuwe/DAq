@@ -6,6 +6,7 @@ function Chart(params, data) {
 	this.HEIGHT = params.height;
 	this.WIDTH = params.width;
 	this.MARGINS = params.margins;
+	this.XMAX = 0;
 	// this.svg = d3.select("main").append("svg")
 	// 	.attr("width", this.WIDTH + this.MARGINS.left + this.MARGINS.right)
 	// 	.attr("height", this.HEIGHT + this.MARGINS.top + this.MARGINS.bottom);
@@ -13,6 +14,7 @@ function Chart(params, data) {
 
 Chart.prototype.generateXScale = function(dataPoint) {
 	var extent = d3.extent(this.data, function(d) { return d[dataPoint]; });
+	this.XMAX = extent[1];
 	return d3.time.scale().domain(extent).range([this.MARGINS.left, this.WIDTH + this.MARGINS.left - this.MARGINS.right]);
 };
 
@@ -210,6 +212,7 @@ MultiLineChart.prototype.generateXScale = function(dataPoint) {
 		if (minDomain == undefined || tempMin < minDomain) { minDomain = tempMin; }
 		if (maxDomain == undefined || tempMax > maxDomain) { maxDomain = tempMax; }
 	}
+	this.XMAX = maxDomain;
 	return d3.time.scale().domain([minDomain, maxDomain]).range([this.MARGINS.left, this.WIDTH + this.MARGINS.left - this.MARGINS.right]);
 };
 
@@ -271,6 +274,17 @@ function GPSChart(track, params, data, geo) {
 	function GPSLaps(parent, data, geo, x) {
 		var self = this;
 
+		this.start = data[0].time;
+		this.xMax = 0;
+		// console.log(this.start);
+		for (i in data) {
+			var relativeTime = data[i].time - this.start;
+			if (this.xMax < relativeTime) {
+				this.xMax = relativeTime;
+			}
+		}
+		console.log(this.xMax);
+
 		// Path
 		this.path = parent.svg.append("path")
 			.datum(geo)
@@ -296,7 +310,7 @@ function GPSChart(track, params, data, geo) {
 
 		function transition(point) {
 			point.transition()
-				.duration(30000)
+				.duration(self.xMax/10)
 				.attrTween("transform", tweenDash);
 		}
 
@@ -346,4 +360,4 @@ function GForceChart() {
 	}
 }
 
-GForceChart.prototype = Object.create(LineChart.prototype);
+GForceChart.prototype = Object.create(SingleLineChart.prototype);

@@ -107,7 +107,8 @@ function getSelectedValue() {
 function render() {
 	var file = getSelectedValue();
 	d3.select("sidebar").selectAll("*").remove();
-	d3.selectAll("svg").remove();
+	d3.select("main").selectAll("*").remove();
+
 	d3.csv(file)
 		.row(function(d) {
 			geo.coordinates.push([+d.gpsLon, +d.gpsLat]);
@@ -270,7 +271,6 @@ function processData() {
 	};
 
 	// var engineLoadGraph = new LineChart(params, data, DataPoints.ENGINELOAD);
-
 	// var coolantTempGraph = new LineChart(params, data, DataPoints.COOLANTTEMP);
 
 	var lapLegend = d3.select("sidebar").append("ul")
