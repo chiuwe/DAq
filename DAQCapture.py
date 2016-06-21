@@ -7,7 +7,37 @@ import gps
 import RPi.GPIO as GPIO
 from datetime import datetime
 
+# 1 = x
+# 2 = -x
+# 3 = y
+# 4 = -y
+# 5 = z
+# 6 = -z
 ORIENTATION_MAPPING = {
+	0b0100: lambda x, y, z: (x, y, z),
+	0b0101: lambda x, y, z: (-x, y, -z),
+	0b0110: lambda x, y, z: (-y, x, z),
+	0b0111: lambda x, y, z: (y, x, -z),
+	0b1000: lambda x, y, z: (-x, -y, z),
+	0b1001: lambda x, y, z: (x, -y, -z),
+	0b1010: lambda x, y, z: (y, -x, z),
+	0b1011: lambda x, y, z: (-y, -x, -z),
+	0b00000: lambda x, y, z: (-x, -z, -y),
+	0b00001: lambda x, y, z: (x, -z, y),
+	0b00010: lambda x, y, z: (-y, -z, x),
+	0b00011: lambda x, y, z: (y, -z, -x),
+	0b00100: lambda x, y, z: (x, z, -y),
+	0b00101: lambda x, y, z: (-x, z, y),
+	0b00110: lambda x, y, z: (y, z, x),
+	0b00111: lambda x, y, z: (-y, z, -x),
+	0b01010: lambda x, y, z: (-z, y, x),
+	0b01011: lambda x, y, z: (z, y, -x),
+	0b01100: lambda x, y, z: (z, x, -y),
+	0b01101: lambda x, y, z: (-z, x, y),
+	0b10010: lambda x, y, z: (z, -y, x),
+	0b10011: lambda x, y, z: (-z, -y, x),
+	0b10100: lambda x, y, z: (-z, -x, -y),
+	0b10101: lambda x, y, z: (z, -x, y)
 }
 MAX_SUPPORTED_COMMANDS = 52
 KPH_TO_MPH = 0.621371
