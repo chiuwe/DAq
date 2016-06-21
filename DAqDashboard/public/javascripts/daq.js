@@ -253,12 +253,12 @@ function processData() {
 			left: 80
 		},
 		tooltip: true,
-		relativeTime: true
+		relativeTime: false
 	};
 
 	// var engineLoadGraph = new LineChart(params, data, DataPoints.ENGINELOAD);
 
-	// var coolantTempGraph = new LineChart(params, data, DataPoints.COOLANTTEMP.type);
+	// var coolantTempGraph = new LineChart(params, data, DataPoints.COOLANTTEMP);
 
 	var gpsParams = {
 		width: 500,
@@ -271,8 +271,8 @@ function processData() {
 		},
 		tooltip: true
 	}
-	console.log(data);
-	console.log(splitLaps);
+	// console.log(data);
+	// console.log(splitLaps);
 	var gpsChart = new GPSChart(track, gpsParams, splitLaps, splitGeo);	
 	for (x in splitLaps) {
 		// var testChart = new LineChart(params, splitLaps[x], DataPoints.GPSSPEED);

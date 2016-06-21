@@ -1,17 +1,16 @@
 var Colors = [
-	#D91E18,
-	#663399,
-	#446CB3,
-	#336E7B,
-	#1F3A93,
-	#26A65B,
-	#F89406
+	"#D91E18",
+	"#663399",
+	"#446CB3",
+	"#336E7B",
+	"#1F3A93",
+	"#26A65B",
+	"#F89406"
 ];
 
 // CHART ======================================================================
 
 function Chart(params, data) {
-	// console.log(data.length);
 	// Setup
 	this.data = data;
 	this.HEIGHT = params.height;
@@ -23,15 +22,13 @@ function Chart(params, data) {
 }
 
 Chart.prototype.generateXScale = function(dataPoint) {
-	var minDomain = d3.min(this.data, function(d) { return d[dataPoint]});
-	var maxDomain = d3.max(this.data, function(d) { return d[dataPoint]});
-	return d3.time.scale().domain([minDomain, maxDomain]).range([this.MARGINS.left, this.WIDTH + this.MARGINS.left - this.MARGINS.right]);
+	var extent = d3.extent(this.data, function(d) { return d[dataPoint]; });
+	return d3.time.scale().domain(extent).range([this.MARGINS.left, this.WIDTH + this.MARGINS.left - this.MARGINS.right]);
 };
 
 Chart.prototype.generateYScale = function(dataPoint) {
-	var minDomain = d3.min(this.data, function(d) { return d[dataPoint]});
-	var maxDomain = d3.max(this.data, function(d) { return d[dataPoint]});
-	return d3.scale.linear().domain([minDomain, maxDomain]).range([this.HEIGHT - this.MARGINS.top, this.MARGINS.bottom]);
+	var extent = d3.extent(this.data, function(d) { return d[dataPoint]; });
+	return d3.scale.linear().domain(extent).range([this.HEIGHT - this.MARGINS.top, this.MARGINS.bottom]);
 };
 
 Chart.prototype.drawXLabel = function(name, unit) {
@@ -156,7 +153,8 @@ LineChart.prototype.drawPlot = function() {
 	var lineFunc = this.generateLineFunction();
 	var line = this.svg.append('svg:path')
 		.attr('d', lineFunc(this.data))
-		.attr("class", "line");
+		.attr("class", "line")
+		.attr("stroke", "#333");
 };
 
 // GPS CHART ==================================================================
@@ -193,59 +191,50 @@ function GPSChart(track, params, data, geo) {
 					.attr("d", self.path)
 					.attr("class", "track");
 	});
+	
+	this.lapPaths = [];
+	for (x in geo) {
+		this.lapPaths[x] = new GPSLaps(this, data[x], geo[x], x);
+	}
 
-	// this.path = d3.geo.path(this.geo)
-	// 	.projection(this.projection);
+	function GPSLaps(parent, data, geo, x) {
+		var self = this;
 
-	// var lineFunc = this.generateLineFunction();
-	// var line = this.svg.append('svg:path')
-	// 	.attr('d', lineFunc(this.data))
-		// .attr("class", "line");
+		// Path
+		this.path = parent.svg.append("path")
+			.datum(geo)
+			.attr("d", parent.path);
 
-	var ppath = this.svg.append("path")
-		.datum(geo)
-		.attr("d", this.path)
-		.attr("class", "line");
-		// .call(transition);
-	// console.log(ppath);
-	// var self = this;
-	// this.svg.selectAll("circle")
-	// 	.data(this.data).enter()
-	// 	.append("circle")
-	// 	.attr("cx", function (d) { return self.projection([d["gpsLon"],d["gpsLat"]])[0]; })
-	// 	.attr("cy", function (d) { return self.projection([d["gpsLon"],d["gpsLat"]])[1]; })
-	// 	.attr("r", "3px")
-	// 	.attr("fill", "red")
+		// Marker
+		var startPoint = geo.coordinates[0];
+		this.marker = parent.svg.append("g")
+			.attr("transform", "translate("+parent.projection(startPoint)[0]+","+parent.projection(startPoint)[1]+")")
+			.call(transition);
+		this.point = this.marker.append("circle")
+			.attr("r", 3)
+			.attr("fill", Colors[x])
+			.attr("id", "marker");
 
-	// this.marker = this.svg.append("circle")
-	// 	.attr("r", 3)
-	// 	.attr("fill", "red")
-	// 	.attr("id", "marker")
-	// 	.attr("transform", "translate("+this.projection(this.geo.coordinates[0])[0]+","+this.projection(this.geo.coordinates[0])[1]+")");
-	// function transition(path) {
-	// 	path.transition()
-	// 		.duration(30000)
-	// 		.attrTween("stroke", tweenDash);
-	// }
-	// function tweenDash() {
-	// 	var l = ppath.node().getTotalLength();
- //    	return function(t) {
-	//       var marker = d3.select("#marker");
-	//       var p = ppath.node().getPointAtLength(t * l);
-	//       marker.attr("transform", "translate(" + p.x + "," + p.y + ")");
-	//       return "black";
-	//     }
-	// }
+		function transition(point) {
+			point.transition()
+				.duration(30000)
+				.attrTween("transform", tweenDash);
+		}
+
+		function tweenDash() {
+			var l = self.path.node().getTotalLength();
+			return function(t) {
+				var point = self.path.node().getPointAtLength(t * l);
+				return "translate(" + point.x +"," + point.y + ")";
+			};
+		}
+
+		// Label
+		this.label = this.marker.append("text")
+			.attr("x", 7)
+			.attr("dy", ".35em")
+			.text(x);
+	}
 }
 
 GPSChart.prototype = Object.create(Chart.prototype);
-// GPSChart.prototype.generateLineFunction = function() {
-// 	var self = this;
-// 	return d3.svg.line()
-// 		.x(function(d) {
-// 			return self.projection([d["gpsLon"],d["gpsLat"]])[0];
-// 		})
-// 		.y(function(d) {
-// 			return self.projection([d["gpsLon"],d["gpsLat"]])[1];
-// 		});
-// };
