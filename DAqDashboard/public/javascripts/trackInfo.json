@@ -1,11 +1,12 @@
 trackInfo = [
 	{
-		"name": "LagunaSeca",
+		"name": "Laguna Seca",
 		"gridSQ": ["CM96co", "CM96do", "CM96cn", "CM96dn"],
 		"x1": "-121.756684",
 		"y1": "36.586491",
 		"x2": "-121.756568",
-		"y2": "36.586425"
+		"y2": "36.586425",
+		"geojson": "/javascripts/lagunaseca.geojson"
 	},
 	{
 		"name": "Buttonwillow",
@@ -16,7 +17,7 @@ trackInfo = [
 		"y2": "35.488693"
 	},
 	{
-		"name": "Sanoma",
+		"name": "Sonoma",
 		"gridSQ": ["CM88sd"],
 		"x1": "-122.454790",
 		"y1": "38.161467",
@@ -24,7 +25,7 @@ trackInfo = [
 		"y2": "38.161583"
 	},
 	{
-		"name": "ThunderHillEast",
+		"name": "Thunder Hill East",
 		"gridSQ": ["CM89um", "CM89un"],
 		"x1": "-122.331306",
 		"y1": "39.538474",
@@ -32,7 +33,7 @@ trackInfo = [
 		"y2": "39.538478"
 	},
 	{
-		"name": "ThunderHillWest",
+		"name": "Thunder Hill West",
 		"gridSQ": ["CM89tm"],
 		"x1": "-122.338890",
 		"y1": "39.537448",

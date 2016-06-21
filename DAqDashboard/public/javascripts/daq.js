@@ -101,23 +101,23 @@ function render() {
 		.row(function(d) {
 			geo.coordinates.push([+d.gpsLon, +d.gpsLat]);
 			return {
-			time: timeFormat.parse(d.time.replace(/(\.[0-9]{3})[0-9]*/, "$1")),
-			engineLoad: +d.engineLoad,
-			coolantTemp: +d.coolantTemp,
-			rpm: +d.rpm,
-			speed: +d.speed,
-			intakeTemp: +d.intakeTemp,
-			maf: +d.maf,
-			throttlePos: +d.throttlePos,
-			timingAdvance: +d.timingAdvance,
-			xG: +d.xG,
-			yG: +d.yG,
-			zG: +d.zG,
-			gpsSpeed: +d.gpsSpeed,
-			gpsLat: +d.gpsLat,
-			gpsLon: +d.gpsLon,
-			gpsAlt: +d.gpsAlt,
-			gpsClimb: +d.gpsClimb};
+				time: timeFormat.parse(d.time.replace(/(\.[0-9]{3})[0-9]*/, "$1")),
+				engineLoad: +d.engineLoad,
+				coolantTemp: +d.coolantTemp,
+				rpm: +d.rpm,
+				speed: +d.speed,
+				intakeTemp: +d.intakeTemp,
+				maf: +d.maf,
+				throttlePos: +d.throttlePos,
+				timingAdvance: +d.timingAdvance,
+				xG: +d.xG,
+				yG: +d.yG,
+				zG: +d.zG,
+				gpsSpeed: +d.gpsSpeed,
+				gpsLat: +d.gpsLat,
+				gpsLon: +d.gpsLon,
+				gpsAlt: +d.gpsAlt,
+				gpsClimb: +d.gpsClimb};
 		})
 		.get(function(error, rows) {
 			data = rows;
@@ -194,6 +194,8 @@ function toGridSquare(param1,param2){
 	return GLon+GLat+nLon+nLat+gLon+gLat;
 }
 
+	var track;
+
 function processLaps() {
 	lap = 0;
 	temp = [];
@@ -203,7 +205,6 @@ function processLaps() {
 		coordinates: []
 	}];
 	i = 0;
-	var track;
 	
 	// find track
 	while(track == null && i < data.length) {
@@ -239,7 +240,6 @@ function processLaps() {
 		}
 	}
 	splitLaps[lap] = temp;
-	// console.log(splitGeo);
 }
 
 function processData() {
@@ -252,7 +252,8 @@ function processData() {
 			bottom: 20,
 			left: 80
 		},
-		tooltip: true
+		tooltip: true,
+		relativeTime: true
 	};
 
 	// var engineLoadGraph = new LineChart(params, data, DataPoints.ENGINELOAD);
@@ -270,12 +271,13 @@ function processData() {
 		},
 		tooltip: true
 	}
+	console.log(data);
+	console.log(splitLaps);
+	var gpsChart = new GPSChart(track, gpsParams, splitLaps, splitGeo);	
 	for (x in splitLaps) {
-		console.log(splitGeo[x]);
-		console.log(splitLaps[x]);
-		var gpsChart = new GPSChart(gpsParams, splitLaps[x], splitGeo[x]);	
+		// var testChart = new LineChart(params, splitLaps[x], DataPoints.GPSSPEED);
+		// var gpsChart = new GPSChart(track, gpsParams, splitLaps[x], splitGeo[x]);	
 	}
-	// var gpsChart = new GPSChart(gpsParams, data, geo);
 }
 
 render();

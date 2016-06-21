@@ -15,6 +15,11 @@ header * {
 svg {
 }
 
+path {
+  fill: none;
+  stroke: #bbb;
+}
+
 path.domain {
   stroke: #bbb;
   stroke-width: 1px;
@@ -29,6 +34,12 @@ path.line {
 
 path.blue {
 	stroke: blue;
+}
+
+path.track {
+  fill: none;
+  stroke: #ccc;
+  stroke-width: 5px;
 }
 
 .overlay {
