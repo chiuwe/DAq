@@ -162,9 +162,11 @@ function MultiLineChart(params, data, dataPoint) {
 	this.params = params;
 	this.dataPoint = dataPoint;
 	if (params.relativeTime == true) {
-		var start = data[0].time;
 		for (x in data) {
-			data[x].relativeTime = data[x].time.getTime() - start.getTime();
+			var start = data[x][0].time;
+			for (y in data[x]) {
+				data[x][y].relativeTime = data[x][y].time - start;	
+			}
 		}
 		this.xScale = this.generateXScale("relativeTime");
 	} else {

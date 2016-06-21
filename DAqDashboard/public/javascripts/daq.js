@@ -5,7 +5,8 @@ var Colors = [
 	"#26A65B",
 	"#446CB3",
 	"#1F3A93",
-	"#663399"
+	"#663399",
+	"#666"
 ];
 var DataPoints = {
 	ENGINELOAD: {
@@ -263,7 +264,7 @@ function processData() {
 			left: 80
 		},
 		tooltip: true,
-		relativeTime: false
+		relativeTime: true
 	};
 
 	// var engineLoadGraph = new LineChart(params, data, DataPoints.ENGINELOAD);
