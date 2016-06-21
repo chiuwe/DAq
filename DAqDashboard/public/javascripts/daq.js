@@ -1,3 +1,12 @@
+var Colors = [
+	"#D91E18",
+	"#F89406",
+	"#336E7B",
+	"#26A65B",
+	"#446CB3",
+	"#1F3A93",
+	"#663399"
+];
 var DataPoints = {
 	ENGINELOAD: {
 		type: "engineLoad",
@@ -96,6 +105,7 @@ function getSelectedValue() {
 
 function render() {
 	var file = getSelectedValue();
+	d3.select("sidebar").selectAll("*").remove();
 	d3.selectAll("svg").remove();
 	d3.csv(file)
 		.row(function(d) {
@@ -260,9 +270,16 @@ function processData() {
 
 	// var coolantTempGraph = new LineChart(params, data, DataPoints.COOLANTTEMP);
 
+	var lapLegend = d3.select("sidebar").append("ul")
+		.attr("class", "legend");
+	for (x in splitLaps) {
+		lapLegend.append("li")
+			.style("background-color", Colors[x])
+			.text("Lap "+(+x+1));
+	}
 	var gpsParams = {
-		width: 500,
-		height: 500,
+		width: 375,
+		height: 375,
 		margins: {
 			top: 0,
 			right: 0,
@@ -271,13 +288,8 @@ function processData() {
 		},
 		tooltip: true
 	}
-	// console.log(data);
-	// console.log(splitLaps);
 	var gpsChart = new GPSChart(track, gpsParams, splitLaps, splitGeo);	
-	for (x in splitLaps) {
-		// var testChart = new LineChart(params, splitLaps[x], DataPoints.GPSSPEED);
-		// var gpsChart = new GPSChart(track, gpsParams, splitLaps[x], splitGeo[x]);	
-	}
+	console.log(splitLaps.length);
 }
 
 render();

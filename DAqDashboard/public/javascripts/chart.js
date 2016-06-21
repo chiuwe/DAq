@@ -1,13 +1,3 @@
-var Colors = [
-	"#D91E18",
-	"#663399",
-	"#446CB3",
-	"#336E7B",
-	"#1F3A93",
-	"#26A65B",
-	"#F89406"
-];
-
 // CHART ======================================================================
 
 function Chart(params, data) {
@@ -16,9 +6,9 @@ function Chart(params, data) {
 	this.HEIGHT = params.height;
 	this.WIDTH = params.width;
 	this.MARGINS = params.margins;
-	this.svg = d3.select("main").append("svg")
-		.attr("width", this.WIDTH + this.MARGINS.left + this.MARGINS.right)
-		.attr("height", this.HEIGHT + this.MARGINS.top + this.MARGINS.bottom);
+	// this.svg = d3.select("main").append("svg")
+	// 	.attr("width", this.WIDTH + this.MARGINS.left + this.MARGINS.right)
+	// 	.attr("height", this.HEIGHT + this.MARGINS.top + this.MARGINS.bottom);
 }
 
 Chart.prototype.generateXScale = function(dataPoint) {
@@ -93,6 +83,10 @@ Chart.prototype.mouseMove = function(svgObj) {
 
 function LineChart(params, data, dataPoint) {
 	Chart.call(this, params, data);
+
+	this.svg = d3.select("main").append("svg")
+		.attr("width", this.WIDTH + this.MARGINS.left + this.MARGINS.right)
+		.attr("height", this.HEIGHT + this.MARGINS.top + this.MARGINS.bottom);
 	this.params = params;
 	this.dataPoint = dataPoint;
 	if (params.relativeTime == true) {
@@ -162,6 +156,9 @@ LineChart.prototype.drawPlot = function() {
 function GPSChart(track, params, data, geo) {
 	Chart.call(this, params, data);
 
+	this.svg = d3.select("sidebar").append("svg")
+		.attr("width", this.WIDTH + this.MARGINS.left + this.MARGINS.right)
+		.attr("height", this.HEIGHT + this.MARGINS.top + this.MARGINS.bottom);
 	this.geo = geo;
 	var self = this;
 
@@ -210,6 +207,14 @@ function GPSChart(track, params, data, geo) {
 		this.marker = parent.svg.append("g")
 			.attr("transform", "translate("+parent.projection(startPoint)[0]+","+parent.projection(startPoint)[1]+")")
 			.call(transition);
+
+		// Marker label
+		this.label = this.marker.append("text")
+			.attr("x", 7)
+			.attr("dy", ".35em")
+			.text(+x+1);
+
+		// Marker point
 		this.point = this.marker.append("circle")
 			.attr("r", 3)
 			.attr("fill", Colors[x])
@@ -228,12 +233,6 @@ function GPSChart(track, params, data, geo) {
 				return "translate(" + point.x +"," + point.y + ")";
 			};
 		}
-
-		// Label
-		this.label = this.marker.append("text")
-			.attr("x", 7)
-			.attr("dy", ".35em")
-			.text(x);
 	}
 }
 
