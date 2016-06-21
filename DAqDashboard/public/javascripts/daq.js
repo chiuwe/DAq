@@ -254,6 +254,8 @@ function processLaps() {
 }
 
 function processData() {
+	d3.select("h1").text("DAq Dashboard - " + track.name);
+
 	var params = {
 		width: 900,
 		height: 200,
@@ -290,6 +292,17 @@ function processData() {
 		tooltip: true
 	}
 	var gpsChart = new GPSChart(track, gpsParams, splitLaps, splitGeo);	
+
+	var dataLegend = d3.select("main").append("ul")
+		.attr("class", "legend");
+	dataLegend.append("li").text(DataPoints.ENGINELOAD.name);
+	dataLegend.append("li").text(DataPoints.COOLANTTEMP.name);
+	dataLegend.append("li").text(DataPoints.RPM.name);
+	dataLegend.append("li").text(DataPoints.OBDSPEED.name);
+	dataLegend.append("li").text(DataPoints.INTAKETEMP.name);
+	dataLegend.append("li").text(DataPoints.MAF.name);
+	dataLegend.append("li").text(DataPoints.THROTTLEPOS.name);
+	dataLegend.append("li").text(DataPoints.TIMINGADV.name);
 
 	var engineLoadGraph = new MultiLineChart(params, splitLaps, DataPoints.ENGINELOAD);
 	var coolantTempGraph = new MultiLineChart(params, splitLaps, DataPoints.COOLANTTEMP);

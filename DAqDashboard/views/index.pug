@@ -2,7 +2,8 @@ extends layout
 
 block content
 	header
-		h1= title
+		//h1= title
+		h1
 		select#files(onchange="render();" value="0")
 			each file, i in csvFiles
 				option= file

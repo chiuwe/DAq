@@ -12,6 +12,10 @@ header * {
 	padding-right: 2em;
 }
 
+header h1 {
+  margin: 0.25em 0;
+}
+
 main {
   float: left;
   width: 900px;
@@ -29,7 +33,7 @@ ul.legend {
   list-style-type: none;
   margin: 0;
   padding: 0;
-  border-radius: 5px;
+  border-radius: 3px;
   display: inline-block;
   overflow: hidden;
 }
@@ -38,6 +42,12 @@ ul.legend li {
   display: inline-block;
   padding: 4px;
   color: #eee;
+}
+
+main ul.legend li {
+  background: #666;
+  margin: 0 2px;
+  border-radius: 3px;
 }
 
 svg {
