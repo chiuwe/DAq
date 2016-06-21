@@ -79,6 +79,7 @@ function processLaps() {
 		coordinates: []
 	};
 	splitLaps = [];
+	splitGeo = [];
 	i = 0;
 	
 	// find track

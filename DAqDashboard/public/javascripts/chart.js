@@ -93,11 +93,7 @@ function SingleLineChart(params, data, dataPoint) {
 	this.params = params;
 	this.dataPoint = dataPoint;
 	if (params.relativeTime == true) {
-		var start = data[0].time;
-		for (x in data) {
-			data[x].relativeTime = data[x].time.getTime() - start.getTime();
-		}
-		this.xScale = this.generateXScale("relativeTime");
+		this.xScale = this.generateXScale("lapTime");
 	} else {
 		this.xScale = this.generateXScale("time");
 	}
@@ -135,7 +131,7 @@ SingleLineChart.prototype.generateLineFunction = function() {
 	var self = this;
 	var x;
 	if (this.params.relativeTime == true) {
-		x = function(d) { return self.xScale(d["relativeTime"]); };
+		x = function(d) { return self.xScale(d["lapTime"]); };
 	} else {
 		x = function(d) { return self.xScale(d["time"]); };
 	}
@@ -165,13 +161,7 @@ function MultiLineChart(params, data, dataPoint) {
 	this.params = params;
 	this.dataPoint = dataPoint;
 	if (params.relativeTime == true) {
-		for (x in data) {
-			var start = data[x][0].time;
-			for (y in data[x]) {
-				data[x][y].relativeTime = data[x][y].time - start;	
-			}
-		}
-		this.xScale = this.generateXScale("relativeTime");
+		this.xScale = this.generateXScale("lapTime");
 	} else {
 		this.xScale = this.generateXScale("time");
 	}
@@ -224,6 +214,7 @@ MultiLineChart.prototype.generateYScale = function(dataPoint) {
 		var tempMax = d3.max(this.data[x], function(d) { return d[dataPoint]; });
 		if (minDomain == undefined || tempMin < minDomain) { minDomain = tempMin; }
 		if (maxDomain == undefined || tempMax > maxDomain) { maxDomain = tempMax; }
+		console.log(dataPoint + "\t" + minDomain + "\t" + maxDomain);
 	}
 	return d3.scale.linear().domain([minDomain, maxDomain]).range([this.HEIGHT - this.MARGINS.top, this.MARGINS.bottom]);
 };
@@ -258,7 +249,6 @@ function GPSChart(track, params, data, geo) {
 	// Draw track
 	this.trackPath = this.svg.append("g");
 	d3.json(track["geojson"], function(json) {
-		console.log(json.features);
 		self.trackPath.selectAll("path")
 			.data(json.features)
 			.enter()
@@ -269,15 +259,12 @@ function GPSChart(track, params, data, geo) {
 
 	this.lapPaths = [];
 	for (x in geo) {
-		// var test = new GPSLaps(this, data[x], geo[x], x);
 		this.lapPaths[x] = new GPSLaps(this, data[x], geo[x], x);
-		// console.log(new GPSLaps(this, data[x], geo[x], x));
 	}
 
 	function GPSLaps(parent, data, geo, x) {
 		var self = this;
 
-		console.log(data.length);
 		this.start = data[0].time;
 		this.xMax = 0;
 		for (i in data) {
