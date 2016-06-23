@@ -7,21 +7,16 @@ import gps
 import RPi.GPIO as GPIO
 from datetime import datetime
 
-# 1 = x
-# 2 = -x
-# 3 = y
-# 4 = -y
-# 5 = z
-# 6 = -z
+# Global Constants
 ORIENTATION_MAPPING = {
-	0b0100: lambda x, y, z: (x, y, z),
-	0b0101: lambda x, y, z: (-x, y, -z),
-	0b0110: lambda x, y, z: (-y, x, z),
-	0b0111: lambda x, y, z: (y, x, -z),
-	0b1000: lambda x, y, z: (-x, -y, z),
-	0b1001: lambda x, y, z: (x, -y, -z),
-	0b1010: lambda x, y, z: (y, -x, z),
-	0b1011: lambda x, y, z: (-y, -x, -z),
+	0b010100: lambda x, y, z: (x, y, z),
+	0b010101: lambda x, y, z: (-x, y, -z),
+	0b011100: lambda x, y, z: (-y, x, z),
+	0b011101: lambda x, y, z: (y, x, -z),
+	0b100100: lambda x, y, z: (-x, -y, z),
+	0b100101: lambda x, y, z: (x, -y, -z),
+	0b101100: lambda x, y, z: (y, -x, z),
+	0b101101: lambda x, y, z: (-y, -x, -z),
 	0b00000: lambda x, y, z: (-x, -z, -y),
 	0b00001: lambda x, y, z: (x, -z, y),
 	0b00010: lambda x, y, z: (-y, -z, x),
@@ -39,17 +34,21 @@ ORIENTATION_MAPPING = {
 	0b10100: lambda x, y, z: (-z, -x, -y),
 	0b10101: lambda x, y, z: (z, -x, y)
 }
+
 MAX_SUPPORTED_COMMANDS = 52
 KPH_TO_MPH = 0.621371
 DIP_IO = [13, 16, 19]
+PL_MASK = 0b11
+PL_BITS = 2
+BAFRO = 0b10
+BAFRO_SHIFT = 3
 DEBUG = False
 
+# Global Variables
 connection = None
 accel = None
 session = None
-globalX = None
-globalY = None
-globalZ = None
+transform = None
 
 def debug(str):
 	if DEBUG:
@@ -68,21 +67,23 @@ def setupDipSwitch():
 # 3 Right			PD
 # 4 Down				LR
 # 5 Left				LL
-def setupDataOrientate():
+def setupDataOrientation():
+	key = 0
 	dipSetBits = 0
 	bitShift = 0
-	downDir = mma.getOrientation()
-	for x in DIP_IO:
-		dipSetBits = dipSetBtis | (GPIO.in(x) << bitShift)
+	mmaOr = mma.getOrientation()
+	x, y, z = mma.readScaledData()
+	
+	for i in DIP_IO:
+		dipSetBits = dipSetBits | (GPIO.in(i) << bitShift)
 		bitShift += 1
-	if dipSetBits <= 1:
-		if dipSetBits:
-			globalX = '-z'
-		else:
-			globalX = 'z'
+	if abs(z) > abs(x) | abs(z) > abs(y):
+		key = (dipSetBits << BAFRO_SHIFT) | (mmaOr & 1) | BAFRO
 	else:
-		downDir = downDir >> 1
+		key = (dipSetBits << PL_BITS) | (mmaOr >> 1 & PL_MASK)
+	transform = ORIENTATION_MAPPING[key]
 
+# TODO: Remove if setupDataOrientation works
 def oritentateData(x, y, z):
 	return -z, y, -x
 
@@ -154,7 +155,7 @@ def logData():
 					gpsClimb = report.climb * gps.MPS_TO_MPH
 			timestamp = datetime.now().strftime("%X.%f")
 			x, y, z = accel.readScaledData()
-			x, y, z = orientateData(x, y, z)
+			x, y, z = transform(x, y, z)
 			rpm = connection.query(obd.commands.RPM).value
 			writer.writerow(
 				{'time': timestamp,
@@ -182,6 +183,7 @@ def logData():
 		
 if __name__ == "__main__":
 	
+	setupDipSwitch()
 	accel = mma.MMA8451()
 	ismma = accel.check8451()
 	if ismma:
@@ -189,6 +191,7 @@ if __name__ == "__main__":
 	else:
 		debug("No MMA Found.")
 	accel.setup()
+	setupDataOrientation()
 	
 	session = gps.gps("localhost", "2947")
 	session.stream(gps.WATCH_ENABLE | gps.WATCH_NEWSTYLE)
