@@ -143,7 +143,7 @@ function processData() {
 
 	var params = {
 		width: 900,
-		height: 200,
+		height: 150,
 		margins: {
 			top: 20,
 			right: 20,
