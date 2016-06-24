@@ -14,7 +14,8 @@ trackInfo = [
 		"x1": "-119.544517",
 		"y1": "35.488842",
 		"x2": "-119.544501",
-		"y2": "35.488693"
+		"y2": "35.488693",
+		"geojson": "/javascripts/buttonwillow.geojson"
 	},
 	{
 		"name": "Sonoma",
@@ -22,7 +23,8 @@ trackInfo = [
 		"x1": "-122.454790",
 		"y1": "38.161467",
 		"x2": "-122.454659",
-		"y2": "38.161583"
+		"y2": "38.161583",
+		"geojson": "/javascripts/sonoma.geojson"
 	},
 	{
 		"name": "Thunderhill East",
@@ -30,7 +32,8 @@ trackInfo = [
 		"x1": "-122.331306",
 		"y1": "39.538474",
 		"x2": "-122.331086",
-		"y2": "39.538478"
+		"y2": "39.538478",
+		"geojson": "/javascripts/thunderhilleast.geojson"
 	},
 	{
 		"name": "Thunderhill West",
@@ -38,6 +41,7 @@ trackInfo = [
 		"x1": "-122.338890",
 		"y1": "39.537448",
 		"x2": "-122.338700",
-		"y2": "39.537465"
+		"y2": "39.537465",
+		"geojson": "/javascripts/thunderhill.geojson"
 	}	
 ]
