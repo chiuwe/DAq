@@ -26,14 +26,14 @@ app.use(express.static(path.join(__dirname, 'public')));
 //}
 
 //app.get('/', routes.index);
+// app.get('/', function(req, res) {
+// 	var options = {
+// 		root: __dirname,
+// 		dotfiles: 'deny',
+// 	};
+// 	res.sendFile("index.html", options);
+// });
 app.get('/', function(req, res) {
-	var options = {
-		root: __dirname,
-		dotfiles: 'deny',
-	};
-	res.sendFile("index.html", options);
-});
-app.get('/test', function(req, res) {
 	var files = fs.readdirSync(path.join(__dirname,'/public/csv'));
 	res.render('index', {title: 'DAq Dashboard', csvFiles: files});
 });

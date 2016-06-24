@@ -1,5 +1,9 @@
-var splitLaps;
 var track;
+var splitLaps;
+var splitGeo = [{
+	type: "LineString",
+	coordinates: []
+}];
 
 function CCW(p1, p2, p3) {
   a = p1.lon; b = p1.lat; 
@@ -70,7 +74,12 @@ function toGridSquare(param1, param2) {
 function processLaps() {
 	lap = 0;
 	temp = [];
+	tempGeo = {
+		type: "LineString",
+		coordinates: []
+	};
 	splitLaps = [];
+	splitGeo = [];
 	i = 0;
 	
 	// find track
@@ -106,13 +115,19 @@ function processLaps() {
 		i++;
 		p3 = new point(data[i].gpsLon, data[i].gpsLat);
 		p4 = new point(data[i+1].gpsLon, data[i+1].gpsLat);
+		tempGeo.coordinates.push([data[i].gpsLon, data[i].gpsLat]);
 		temp.push(data[i]);
 		temp[temp.length - 1].lapTime = data[i].time - temp[0].time;
 		if (isIntersect(p1, p2, p3, p4)) {
 			splitLaps[lap] = temp;
+			splitGeo[lap] = tempGeo;
 			lap++;
 // 				console.log("lap " + lap + ": " + (temp[temp.length - 1].time - temp[0].time)/1000);
 			temp = [];
+			tempGeo = {
+				type: "LineString",
+				coordinates: []
+			};
 		}
 	}
 // 		console.log("lap " + (lap + 1) + ": " + (temp[temp.length - 1].time - temp[0].time)/1000);
