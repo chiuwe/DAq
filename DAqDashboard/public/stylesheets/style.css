@@ -44,6 +44,17 @@ ul.legend li {
   color: #eee;
 }
 
+circle.solid {
+  fill: none;
+  stroke: #bbb;
+}
+
+circle.dashed {
+  fill: none;
+  stroke: #bbb;
+  stroke-dasharray: 7,3;
+}
+
 main ul.legend li {
   background: #666;
   margin: 0 2px;

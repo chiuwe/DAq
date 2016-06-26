@@ -141,6 +141,27 @@ function render() {
 function processData() {
 	d3.select("h1").text("DAq Dashboard - " + track.name);
 
+	var lapLegend = d3.select("sidebar").append("ul")
+		.attr("class", "legend");
+	for (x in splitLaps) {
+		lapLegend.append("li")
+			.style("background-color", Colors[x])
+			.text("Lap "+(+x+1));
+	}
+	var gpsParams = {
+		width: 350,
+		height: 350,
+		margins: {
+			top: 10,
+			right: 10,
+			bottom: 10,
+			left: 10
+		},
+		tooltip: true
+	}
+	var gpsChart = new GPSChart(track, gpsParams, splitLaps, splitGeo);	
+	var gForceChart = new GForceChart(gpsParams, splitLaps);
+
 	var params = {
 		width: 900,
 		height: 150,
@@ -153,29 +174,6 @@ function processData() {
 		tooltip: true,
 		relativeTime: true
 	};
-
-	// var engineLoadGraph = new LineChart(params, data, DataPoints.ENGINELOAD);
-	// var coolantTempGraph = new LineChart(params, data, DataPoints.COOLANTTEMP);
-
-	var lapLegend = d3.select("sidebar").append("ul")
-		.attr("class", "legend");
-	for (x in splitLaps) {
-		lapLegend.append("li")
-			.style("background-color", Colors[x])
-			.text("Lap "+(+x+1));
-	}
-	var gpsParams = {
-		width: 375,
-		height: 375,
-		margins: {
-			top: 0,
-			right: 0,
-			bottom: 0,
-			left: 0
-		},
-		tooltip: true
-	}
-	var gpsChart = new GPSChart(track, gpsParams, splitLaps, splitGeo);	
 
 	var dataLegend = d3.select("main").append("ul")
 		.attr("class", "legend");

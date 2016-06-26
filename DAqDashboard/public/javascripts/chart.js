@@ -317,36 +317,83 @@ GPSChart.prototype = Object.create(Chart.prototype);
 
 // G-FORCE CHART ==============================================================
 
-function GForceChart() {
+function GForceChart(params, data) {
 	Chart.call(this, params, data);
 
-	this.svg = d3.select("main").append("svg")
+	this.svg = d3.select("sidebar").append("svg")
 		.attr("width", this.WIDTH + this.MARGINS.left + this.MARGINS.right)
 		.attr("height", this.HEIGHT + this.MARGINS.top + this.MARGINS.bottom);
 	this.params = params;
-	this.dataPoint = dataPoint;
-	if (params.relativeTime == true) {
-		var start = data[0].time;
-		for (x in data) {
-			data[x].relativeTime = data[x].time.getTime() - start.getTime();
-		}
-		this.xScale = this.generateXScale("relativeTime");
-	} else {
-		this.xScale = this.generateXScale("time");
-	}
-	this.xScale.tickFormat(d3.time.format("%M:%S.%L"));
-	this.xAxis = d3.svg.axis().scale(this.xScale);
-	this.yScale = this.generateYScale(this.dataPoint.type);
-	this.yAxis = d3.svg.axis().scale(this.yScale).orient("left");
 
-	this.drawXAxis();
-	this.drawYAxis();
-	this.drawXLabel("Time");
-	this.drawYLabel(this.dataPoint.name, this.dataPoint.unit);
-	this.drawPlot();
-	if (params.tooltip == true) {
-		this.generateTooltip();		
+	this.xScale = d3.scale.linear().domain([-2,2]).range([this.MARGINS.left, this.WIDTH + this.MARGINS.left]);
+	this.yScale = d3.scale.linear().domain([-2,2]).range([this.HEIGHT + this.MARGINS.top, this.MARGINS.top]);
+
+	// Draw X-axis
+	this.xAxis = d3.svg.axis().scale(this.xScale);
+	this.svg.append("svg:g")
+		.attr('stroke-width', 1)
+		.attr('transform', 'translate(0,' + ((this.HEIGHT / 2) + this.MARGINS.top) + ')')
+		.call(this.xAxis);
+	// Draw Y-axis
+	this.yAxis = d3.svg.axis().scale(this.yScale).orient("left");
+	this.svg.append("svg:g")
+			.attr('transform', 'translate(' + (this.MARGINS.left + (this.WIDTH / 2) ) + ',0)')
+			.call(this.yAxis);
+	// if (params.tooltip == true) {
+	// 	this.generateTooltip();		
+	// }
+
+	// Guidelines
+
+	var half = this.svg.append("circle")
+		.attr("cx", (this.MARGINS.left + (this.WIDTH / 2) ))
+		.attr("cy", (this.HEIGHT / 2) + this.MARGINS.top)
+		.attr("r", this.WIDTH / 8)
+		.attr("class", "dashed");
+
+	var one = this.svg.append("circle")
+		.attr("cx", (this.MARGINS.left + (this.WIDTH / 2) ))
+		.attr("cy", ((this.HEIGHT / 2) + this.MARGINS.top))
+		.attr("r", this.WIDTH / 4)
+		.attr("class", "solid");
+
+	var onehalf = this.svg.append("circle")
+		.attr("cx", (this.MARGINS.left + (this.WIDTH / 2) ))
+		.attr("cy", ((this.HEIGHT / 2) + this.MARGINS.top))
+		.attr("r", this.WIDTH * (3/8))
+		.attr("class", "dashed");
+
+	var two = this.svg.append("circle")
+		.attr("cx", (this.MARGINS.left + (this.WIDTH / 2) ))
+		.attr("cy", ((this.HEIGHT / 2) + this.MARGINS.top))
+		.attr("r", this.WIDTH / 2)
+		.attr("class", "solid");
+
+	this.plots = [];
+	for (x in data) {
+		this.plots[x] = new LinePlot(this, data[x], x);
+	}
+
+	function LinePlot(parent, data, x) {
+		var parent = parent;
+		this.lineFunc = parent.generateLineFunction();
+		this.line = parent.svg.append("path")
+			.attr("d", this.lineFunc(data))
+			.attr("class", "line")
+			.attr("stroke", Colors[x]);
+		return this.line
 	}
 }
 
 GForceChart.prototype = Object.create(SingleLineChart.prototype);
+
+GForceChart.prototype.generateLineFunction = function() {
+	var self = this;
+	return d3.svg.line()
+		.x(function(d) {
+			return self.xScale(d[DataPoints.XG.type])
+		})
+		.y(function(d) {
+			return self.yScale(d[DataPoints.YG.type]);
+		});
+};
