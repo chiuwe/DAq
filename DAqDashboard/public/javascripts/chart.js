@@ -265,12 +265,12 @@ function GPSChart(track, params, data, geo) {
 	function GPSLaps(parent, data, geo, x) {
 		var self = this;
 
-		this.start = data[0].time;
+		// this.start = data[0].time;
 		this.xMax = 0;
 		for (i in data) {
-			var relativeTime = data[i].time - this.start;
-			if (this.xMax < relativeTime) {
-				this.xMax = relativeTime;
+			// var relativeTime = data[i].time - this.start;
+			if (this.xMax < data[i].lapTime) {
+				this.xMax = data[i].lapTime;
 			}
 		}
 
@@ -364,11 +364,12 @@ function GForceChart(params, data) {
 
 	 // this.plots = [];
 	 for (x in data) {
-	 	this.svg.append("path")
-		    .datum(data[x])
-		    .attr("class", "line")
-		    .attr("d", this.line)
-			.attr("stroke", Colors[x]);
+	 	// this.svg.append("path")
+		 //    .datum(data[x])
+		 //    .attr("class", "line")
+		 //    .attr("d", this.line)
+			// .attr("stroke", Colors[x]);
+		new Plot(this, data[x], x);
 	 }
 
 	// this.plots = [];
@@ -385,6 +386,65 @@ function GForceChart(params, data) {
 	// 		.attr("stroke", Colors[x]);
 	// 	return this.line
 	// }
+	function Plot(parent, data, x) {
+		var self = this;
+
+		this.xMax = 0;
+		for (i in data) {
+			// var relativeTime = data[i].time - this.start;
+			if (this.xMax < data[i].lapTime) {
+				this.xMax = data[i].lapTime;
+			}
+		}
+
+		// Path
+	 	this.path = parent.svg.append("path")
+		    .datum(data)
+		    .attr("class", "line")
+		    .attr("d", parent.line);
+			// .attr("stroke", Colors[x]);
+
+		// Marker
+		// var startPoint = geo.coordinates[0];
+		var radius = parent.r(parent.convertToPolarRadius(data[0].xG, data[0].yG));
+		var angle = parent.convertToPolarAngle(data[0].xG, data[0].yG);
+		var transform = d3.transform("translate("+radius+") rotate("+angle+")");
+		console.log(this.path);
+		this.marker = parent.svg.append("g")
+			.attr("transform", "translate("+radius+") rotate("+angle+",0,0)")
+			.call(transition);
+			// .attr("transform", "translate("+radius+",0) rotateZ("+angle+"deg)");
+			// .attr("transform", "rotate("+angle+")");
+			// .attr("transform", "translate("+parent.projection(startPoint)[0]+","+parent.projection(startPoint)[1]+")")
+		// 	.call(transition);
+
+		// Marker label
+		// this.label = this.marker.append("text")
+		// 	.attr("x", 7)
+		// 	.attr("dy", ".35em")
+			// .text(+x+1);
+
+		// Marker point
+		this.point = this.marker.append("circle")
+			.attr("r", 3)
+			.attr("fill", Colors[x])
+			.attr("id", "marker");
+
+		function transition(point) {
+			point.transition()
+				.duration(self.xMax/10)
+				// .duration(30000)
+				.attrTween("transform", tweenDash);
+		}
+
+		function tweenDash() {
+			var l = self.path.node().getTotalLength();
+			return function(t) {
+				var point = self.path.node().getPointAtLength(t * l);
+				return "translate(" + point.x +"," + point.y + ")";
+			};
+		}
+	}
 }
 
 GForceChart.prototype = Object.create(SingleLineChart.prototype);
