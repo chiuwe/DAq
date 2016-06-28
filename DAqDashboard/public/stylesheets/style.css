@@ -49,10 +49,15 @@ circle.solid {
   stroke: #bbb;
 }
 
-circle.dashed {
+circle.dashed, .axis {
   fill: none;
   stroke: #bbb;
-  stroke-dasharray: 7,3;
+  stroke-dasharray: 5,2;
+}
+
+.axis text {
+  font-size: .75em;
+  stroke-dasharray: none;
 }
 
 main ul.legend li {

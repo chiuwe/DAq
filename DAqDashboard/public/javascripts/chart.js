@@ -319,70 +319,72 @@ GPSChart.prototype = Object.create(Chart.prototype);
 
 function GForceChart(params, data) {
 	Chart.call(this, params, data);
+	var self = this;
 
 	this.svg = d3.select("sidebar").append("svg")
 		.attr("width", this.WIDTH + this.MARGINS.left + this.MARGINS.right)
-		.attr("height", this.HEIGHT + this.MARGINS.top + this.MARGINS.bottom);
+		.attr("height", this.HEIGHT + this.MARGINS.top + this.MARGINS.bottom)//;
+		.append("g")
+			.attr("transform", "translate("+((this.WIDTH/2)+this.MARGINS.left)+","+((this.HEIGHT/2)+this.MARGINS.top)+")");
 	this.params = params;
 
-	this.xScale = d3.scale.linear().domain([-2,2]).range([this.MARGINS.left, this.WIDTH + this.MARGINS.left]);
-	this.yScale = d3.scale.linear().domain([-2,2]).range([this.HEIGHT + this.MARGINS.top, this.MARGINS.top]);
+	this.r = d3.scale.linear()
+		.domain([0,2])
+		.range([0, (this.WIDTH/2)]);
+	this.rAxis = this.svg.append("g")
+		.attr("class", "axis")
+		.selectAll("g")
+		.data(this.r.ticks(4).slice(0.5))
+		.enter().append("g");
+	this.rAxis.append("circle")
+		.attr("r", this.r);
+	this.rAxis.append("text")
+		.attr("y", function(d) { return -self.r(d) - 3 })
+		.attr("transform", "rotate(45)")
+		.style("text-anchor", "middle")
+		.text(function(d) { return d });
 
-	// Draw X-axis
-	this.xAxis = d3.svg.axis().scale(this.xScale);
-	this.svg.append("svg:g")
-		.attr('stroke-width', 1)
-		.attr('transform', 'translate(0,' + ((this.HEIGHT / 2) + this.MARGINS.top) + ')')
-		.call(this.xAxis);
-	// Draw Y-axis
-	this.yAxis = d3.svg.axis().scale(this.yScale).orient("left");
-	this.svg.append("svg:g")
-			.attr('transform', 'translate(' + (this.MARGINS.left + (this.WIDTH / 2) ) + ',0)')
-			.call(this.yAxis);
-	// if (params.tooltip == true) {
-	// 	this.generateTooltip();		
+	this.aAxis = this.svg.append("g")
+		.attr("class", "axis")
+		.selectAll("g")
+			.data(d3.range(0, 360, 90))
+		.enter().append("g")
+			.attr("transform", function(d) { return "rotate("+-d+")"; });
+	this.aAxis.append("line")
+		.attr("x2", this.WIDTH/2);
+
+	this.line = d3.svg.line.radial()
+		.radius(function(d) { return self.r(self.convertToPolarRadius(d[DataPoints.XG.type], d[DataPoints.YG.type])); })
+		.angle(function(d) { return self.convertToPolarAngle(d[DataPoints.XG.type], d[DataPoints.YG.type]); });
+
+	this.svg.append("path")
+	    .datum(data[0])
+	    .attr("class", "line")
+	    .attr("d", this.line);
+
+	 // this.plots = [];
+	 for (x in data) {
+	 	this.svg.append("path")
+		    .datum(data[x])
+		    .attr("class", "line")
+		    .attr("d", this.line)
+			.attr("stroke", Colors[x]);
+	 }
+
+	// this.plots = [];
+	// for (x in data) {
+	// 	this.plots[x] = new LinePlot(this, data[x], x);
 	// }
 
-	// Guidelines
-
-	var half = this.svg.append("circle")
-		.attr("cx", (this.MARGINS.left + (this.WIDTH / 2) ))
-		.attr("cy", (this.HEIGHT / 2) + this.MARGINS.top)
-		.attr("r", this.WIDTH / 8)
-		.attr("class", "dashed");
-
-	var one = this.svg.append("circle")
-		.attr("cx", (this.MARGINS.left + (this.WIDTH / 2) ))
-		.attr("cy", ((this.HEIGHT / 2) + this.MARGINS.top))
-		.attr("r", this.WIDTH / 4)
-		.attr("class", "solid");
-
-	var onehalf = this.svg.append("circle")
-		.attr("cx", (this.MARGINS.left + (this.WIDTH / 2) ))
-		.attr("cy", ((this.HEIGHT / 2) + this.MARGINS.top))
-		.attr("r", this.WIDTH * (3/8))
-		.attr("class", "dashed");
-
-	var two = this.svg.append("circle")
-		.attr("cx", (this.MARGINS.left + (this.WIDTH / 2) ))
-		.attr("cy", ((this.HEIGHT / 2) + this.MARGINS.top))
-		.attr("r", this.WIDTH / 2)
-		.attr("class", "solid");
-
-	this.plots = [];
-	for (x in data) {
-		this.plots[x] = new LinePlot(this, data[x], x);
-	}
-
-	function LinePlot(parent, data, x) {
-		var parent = parent;
-		this.lineFunc = parent.generateLineFunction();
-		this.line = parent.svg.append("path")
-			.attr("d", this.lineFunc(data))
-			.attr("class", "line")
-			.attr("stroke", Colors[x]);
-		return this.line
-	}
+	// function LinePlot(parent, data, x) {
+	// 	var parent = parent;
+	// 	this.lineFunc = parent.generateLineFunction();
+	// 	this.line = parent.svg.append("path")
+	// 		.attr("d", this.lineFunc(data))
+	// 		.attr("class", "line")
+	// 		.attr("stroke", Colors[x]);
+	// 	return this.line
+	// }
 }
 
 GForceChart.prototype = Object.create(SingleLineChart.prototype);
@@ -396,4 +398,27 @@ GForceChart.prototype.generateLineFunction = function() {
 		.y(function(d) {
 			return self.yScale(d[DataPoints.YG.type]);
 		});
+};
+
+GForceChart.prototype.convertToPolarRadius = function(x, y) {
+
+	console.log(x+"\t"+y+"\t"+Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)));
+	return Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
+};
+
+GForceChart.prototype.convertToPolarAngle = function(x, y) {
+	var theta = Math.atan(y/x);
+	// console.log(theta);
+	var quadrant = this.getQuadrant(x, y);
+	if (quadrant == 1) return theta;
+	if (quadrant == 2) return 180 + theta;//Math.PI - theta;
+	if (quadrant == 3) return 180 + theta;//Math.PI + theta;
+	if (quadrant == 4) return 360 + theta;//2 * Math.PI - theta;
+};
+
+GForceChart.prototype.getQuadrant = function(x, y) {
+	if ( x < 0 && y >= 0 ) return 2;
+	if ( x < 0 && y < 0 ) return 3;
+	if ( x >= 0 && y < 0 ) return 4;
+	return 1;
 };
