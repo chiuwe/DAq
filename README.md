@@ -74,9 +74,9 @@ DEVICES="/dev/ttyS0"
 GPSD_OPTIONS="-n -G"
 ```
 
-Restart GPS Daemon:
+Reboot Pi:
 ```
-sudo /etc/init.d/gpsd restart
+sudo reboot
 ```
 
 If your GPS has a fix then running `cgps -s` should result in some GPS relate data.
