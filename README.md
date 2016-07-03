@@ -24,6 +24,19 @@ The data points collected are:
 
 ## Raspberry Pi 3 Setup
 
+### Additional Packages
+
+```
+# OBD python library
+pip install obd
+
+# I2C support
+sudo apt-get install python-smbus
+
+# GPS support
+sudo apt-get install gpsd gpsd-clients python-gps
+```
+
 ### Changes to `sudo raspi-config`:
 
 - Enable I2C
@@ -43,11 +56,6 @@ sudo echo -n 1 > /sys/module/i2c_bcm2708/parameters/combined
 ```
 
 ### GPS Setup
-
-Install GPS related packages:
-```
-sudo apt-get install gpsd gpsd-clients python-gps
-```
 
 Remove reference of `serial0` from `/boot/cmdline.txt`:
 ```
