@@ -28,7 +28,7 @@ The data points collected are:
 
 ```
 # OBD python library
-pip install obd
+sudo pip install obd
 
 # I2C support
 sudo apt-get install python-smbus
