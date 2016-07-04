@@ -37,7 +37,12 @@ sudo apt-get install python-smbus
 sudo apt-get install gpsd gpsd-clients python-gps
 ```
 
-### Setup Bluetooth OBDII:
+### Changes to `sudo raspi-config`
+
+- Enable I2C
+- Enable Serial
+
+### Setup Bluetooth OBDII
 
 ```
 bluetoothctl
@@ -50,25 +55,7 @@ trust <MAC>
 quit
 ```
 
-### Changes to `sudo raspi-config`:
-
-- Enable I2C
-- Enable Serial
-
-### Add the following lines to `/etc/rc.local`:
-
-```
-# Needed to connect bluetooth to serial port
-# 00:1D:A5:00:17:08 is the MAC address of the OBDII bluetooth device
-# & is needed to fork this call because it doesn't return (blocking call)
-sudo rfcomm bind rfcomm0 00:1D:A5:00:17:08 &
-
-# Setting up I2C
-sudo chmod 666 /sys/module/i2c_bcm2708/parameters/combined
-sudo echo -n 1 > /sys/module/i2c_bcm2708/parameters/combined
-```
-
-### GPS Setup
+### Setup Serial GPS
 
 Remove reference of `serial0` from `/boot/cmdline.txt`:
 ```
@@ -87,12 +74,25 @@ DEVICES="/dev/ttyS0"
 GPSD_OPTIONS="-n -G"
 ```
 
+for older Pi's please refer to link for setup:
+<https://learn.adafruit.com/adafruit-ultimate-gps-hat-for-raspberry-pi/pi-setup>
+
+### Add the following lines to `/etc/rc.local`
+
+```
+# Needed to connect bluetooth to serial port
+# 00:1D:A5:00:17:08 is the MAC address of the OBDII bluetooth device
+# & is needed to fork this call because it doesn't return (blocking call)
+sudo rfcomm bind rfcomm0 <MAC> &
+
+# Setting up I2C
+sudo chmod 666 /sys/module/i2c_bcm2708/parameters/combined
+sudo echo -n 1 > /sys/module/i2c_bcm2708/parameters/combined
+```
+
 Reboot Pi:
 ```
 sudo reboot
 ```
 
 If your GPS has a fix then running `cgps -s` should result in some GPS relate data.
-
-for older Pi's please refer to link for setup:
-<https://learn.adafruit.com/adafruit-ultimate-gps-hat-for-raspberry-pi/pi-setup>
