@@ -37,6 +37,19 @@ sudo apt-get install python-smbus
 sudo apt-get install gpsd gpsd-clients python-gps
 ```
 
+### Setup Bluetooth OBDII:
+
+```
+bluetoothctl
+power on
+agent on
+scan on
+# Look for OBDII <MAC>
+pair <MAC>
+trust <MAC>
+quit
+```
+
 ### Changes to `sudo raspi-config`:
 
 - Enable I2C
