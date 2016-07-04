@@ -74,6 +74,7 @@ def setupGPIO():
 # 4 Down				LR
 # 5 Left				LL
 def setupDataOrientation():
+	global transform
 	key = 0
 	dipSetBits = 0
 	bitShift = 0
