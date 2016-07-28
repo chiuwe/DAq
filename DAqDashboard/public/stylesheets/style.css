@@ -52,7 +52,7 @@ circle.solid {
 circle.dashed, .axis {
   fill: none;
   stroke: #bbb;
-  stroke-dasharray: 5,2;
+  stroke-dasharray: 4,3;
 }
 
 .axis text {
