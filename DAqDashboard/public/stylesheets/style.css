@@ -49,9 +49,15 @@ circle.solid {
   stroke: #bbb;
 }
 
-circle.dashed, .axis {
+circle.dashed {
   fill: none;
   stroke: #bbb;
+  stroke-dasharray: 4,3;
+}
+
+.axis {
+  fill: none;
+  stroke: #ddd;
   stroke-dasharray: 4,3;
 }
 

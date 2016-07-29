@@ -7,9 +7,6 @@ function Chart(params, data) {
 	this.WIDTH = params.width;
 	this.MARGINS = params.margins;
 	this.XMAX = 0;
-	// this.svg = d3.select("main").append("svg")
-	// 	.attr("width", this.WIDTH + this.MARGINS.left + this.MARGINS.right)
-	// 	.attr("height", this.HEIGHT + this.MARGINS.top + this.MARGINS.bottom);
 }
 
 Chart.prototype.generateXScale = function(dataPoint) {

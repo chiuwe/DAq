@@ -95,9 +95,7 @@ var geo = {
 	type: "LineString",
 	coordinates: []
 };
-// var splitGeo = [];
 var data;
-// var splitLaps;
 
 function getSelectedValue() {
 	var file = document.getElementById("files").value;
