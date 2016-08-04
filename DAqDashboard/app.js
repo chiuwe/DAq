@@ -1,5 +1,6 @@
 // Module dependencies
 var express = require('express');
+var morgan = require('morgan');
 var routes = require('./routes');
 //var user = require('./routes/user');
 var http = require('http');
@@ -19,6 +20,7 @@ app.set('view engine', 'pug');
 //app.use(express.methodOverride());
 //app.use(app.router);
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(morgan('dev'));
 
 // development only
 //if ('development' == app.get('env')) {
@@ -36,6 +38,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.get('/', function(req, res) {
 	var files = fs.readdirSync(path.join(__dirname,'/public/csv'));
 	res.render('index', {title: 'DAq Dashboard', csvFiles: files});
+});
+
+app.get('/test', function(req, res) {
+	var files = fs.readdirSync(path.join(__dirname, '/public/csv'));
+	res.render('test', {title: "Test", csvFiles: files});
 });
 
 http.createServer(app).listen(app.get('port'), function(){
