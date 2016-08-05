@@ -188,6 +188,7 @@ function processData() {
 	var coolantTempGraph = new MultiLineChart(params, splitLaps, DataPoints.COOLANTTEMP);
 	var rpmGraph = new MultiLineChart(params, splitLaps, DataPoints.RPM);
 	var obdSpeedGraph = new MultiLineChart(params, splitLaps, DataPoints.OBDSPEED);
+	var gpsSpeedGraph = new MultiLineChart(params, splitLaps, DataPoints.GPSSPEED);
 	var intakeTempGraph = new MultiLineChart(params, splitLaps, DataPoints.INTAKETEMP);
 	var mafGraph = new MultiLineChart(params, splitLaps, DataPoints.MAF);
 	var throttlePosGraph = new MultiLineChart(params, splitLaps, DataPoints.THROTTLEPOS);
