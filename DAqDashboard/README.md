@@ -10,3 +10,4 @@
 # Todo
 
 [ ] Make debug page that plots all data, not split laps
+[ ] Draw start lines on map
