@@ -162,10 +162,72 @@ var margin = {
 };
 var width = 960 - margin.left - margin.right;
 var height = 65 - margin.top - margin.bottom;
-var x = d3.scaleTime().range([0, width]);
+var x;
+var epoch;
+var y = d3.local();
+var line = d3.local();
 
 function processData() {
 	d3.select("h1").text("Test - " + track.name);
+
+	epoch = getTimeDomain()[0];
+	xScale = d3.scaleTime()
+		.domain(getTimeDomain())
+		.range([0, width]);
+	var axis = d3.axisTop()
+		.scale(xScale)
+		.tickFormat(formatRelativeTime)
+		.ticks(d3.timeSecond.every(30));
+	d3.select("main").append("svg")
+		.attr("class", "axis")
+		.attr("width", width + margin.left + margin.right)
+		.append("g")
+			.attr("transform", "translate("+margin.left+", 30)")
+			.call(axis);
+
+	var svg = d3.select("main").selectAll("svg")
+		.data(splitLaps)
+		.enter().append("svg")
+			.attr("height", height)
+			.attr("width", width + margin.left + margin.right)
+			.append("g")
+				.each(function(d) {
+					var ty = y.set(this, d3.scaleLinear()
+						.domain([0, d3.max(d, function(d) { return DataPoints.GPSSPEED.type; })])
+						.range([0, height]));
+					line.set(this, d3.line()
+						.x(function(d) {return x(d["lapTime"]); })
+						.y(function(d) {return ty(d["gpsSpeed"]); }));
+				});
+	svg.append("path")
+		.attr("class", "line")
+		.attr("d", function(d) { console.log(d); return line.get(this)(d["gpsSpeed"]); });
+
+	var rule = d3.select("main").append("div")
+		.attr("class", "line")
+		.style("position", "absolute")
+		.style("top", 0)
+		.style("bottom", 0)
+		.style("width", "1px")
+		.style("pointer-events", "none");
+}
+
+function getTimeDomain() {
+	var maxDomain;
+	var minDomain;
+	for (i in splitLaps) {
+		var tempMin = d3.min(splitLaps[i], function(d) { return d["lapTime"]; });
+		var tempMax = d3.max(splitLaps[i], function(d) { return d["lapTime"]; });
+		if (minDomain == undefined || tempMin < minDomain) { minDomain = tempMin; }
+		if (maxDomain == undefined || tempMax > maxDomain) { maxDomain = tempMax; }
+	}
+	return [minDomain, maxDomain];
+}
+
+var pad = d3.format("02d");
+function formatRelativeTime(input) {
+	return Math.floor(input / 6e4) + ":"
+      + pad(Math.floor(input % 6e4 / 1e3));
 }
 
 render();

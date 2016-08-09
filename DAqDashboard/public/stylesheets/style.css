@@ -18,8 +18,14 @@ header h1 {
 
 main {
   float: left;
-  width: 900px;
+  position: relative;
+  /*display: block;*/
+  /*width: 900px;*/
   /*border: 1px solid red;*/
+}
+
+path {
+  shape-rendering: crispEdges;
 }
 
 sidebar {
@@ -55,7 +61,7 @@ circle.dashed {
   stroke-dasharray: 4,3;
 }
 
-.axis {
+/*.axis {
   fill: none;
   stroke: #ddd;
   stroke-dasharray: 4,3;
@@ -64,7 +70,7 @@ circle.dashed {
 .axis text {
   font-size: .75em;
   stroke-dasharray: none;
-}
+}*/
 
 main ul.legend li {
   background: #666;
@@ -81,11 +87,11 @@ path {
   /*stroke: #bbb;*/
 }
 
-path.domain {
+/*path.domain {
   stroke: #bbb;
   stroke-width: 1px;
   fill: none;
-}
+}*/
 
 path.line {
   /*stroke: #333;*/
@@ -109,5 +115,10 @@ path.track {
 }
 
 .tick {
-	font-size: 0.75em;
+	font-size: 1em;
+}
+
+.line {
+  background: #000;
+  opacity: .2;
 }
