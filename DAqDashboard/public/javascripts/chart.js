@@ -334,6 +334,7 @@ function GForceChart(params, data) {
 		.data(this.r.ticks(4).slice(0.5))
 		.enter().append("g");
 	this.rAxis.append("circle")
+		.attr("class", "outline")
 		.attr("r", this.r);
 	this.rAxis.append("text")
 		.attr("y", function(d) { return -self.r(d) - 3 })
