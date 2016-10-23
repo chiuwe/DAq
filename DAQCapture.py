@@ -150,7 +150,7 @@ def logData():
 	debug(filename)
 	
 	with open(filename, 'w') as csvfile:
-		fieldnames = ['time', 'engineLoad', 'coolantTemp', 'rpm', 'speed', 'intakeTemp', 'maf', 'throttlePos', 'timingAdvance', 'xG', 'yG', 'zG', 'orientation', 'gpsSpeed', 'gpsLat', 'gpsLon', 'gpsAlt', 'gpsClimb']
+		fieldnames = ['time', 'engineLoad', 'coolantTemp', 'rpm', 'speed', 'intakeTemp', 'maf', 'throttlePos', 'timingAdvance', 'xG', 'yG', 'zG', 'gpsSpeed', 'gpsLat', 'gpsLon', 'gpsAlt', 'gpsClimb']
 		writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 		writer.writeheader()
 		
@@ -194,8 +194,8 @@ def logData():
 				'yG' : y,
 				'zG' : z,
 				'gpsSpeed' : gpsSpeed,
-				'gpsLon' : gpsLon,
 				'gpsLat' : gpsLat,
+				'gpsLon' : gpsLon,
 				'gpsAlt' : gpsAlt,
 				'gpsClimb' : gpsClimb})
 			time.sleep(0.1)
