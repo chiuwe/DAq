@@ -45,6 +45,11 @@ app.get('/test', function(req, res) {
 	res.render('test', {title: "Test", csvFiles: files});
 });
 
+app.get('/all', function(req, res) {
+	var files = fs.readdirSync(path.join(__dirname, '/public/csv'));
+	res.render('all', {title: "All laps", csvFiles: files});
+})
+
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });
