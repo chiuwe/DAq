@@ -1,0 +1,16 @@
+extends layout
+
+block content
+	header
+		h1= title
+		select#files(onchange="render();" value="0")
+			each file, i in csvFiles
+				option= file
+	sidebar
+	main
+	link(rel='stylesheet', href='/stylesheets/style.css')
+	script(src="/javascripts/d3.min.js" charset="utf-8")
+	script(src="/javascripts/daqAll.js" charset="utf-8")
+	script(src="/javascripts/lapParser.js" charset="utf-8")
+	script(src="/javascripts/chart.js" charset="utf-8")
+	script(src="/javascripts/trackinfo.json" charset="utf-8")

@@ -195,8 +195,8 @@ def logData():
 				'yG' : y,
 				'zG' : z,
 				'gpsSpeed' : gpsSpeed,
-				'gpsLon' : gpsLon,
 				'gpsLat' : gpsLat,
+				'gpsLon' : gpsLon,
 				'gpsAlt' : gpsAlt,
 				'gpsClimb' : gpsClimb})
 			time.sleep(0.1)
