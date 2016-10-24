@@ -67,10 +67,10 @@ def setupGPIO():
 
 # Direction of accelerometer
 # Front 				Down (getOrientation())
-# 0 Front			Front
+# 0 Front				Front
 # 1 Back				Back
-# 2 Up				PU
-# 3 Right			PD
+# 2 Up					PU
+# 3 Right				PD
 # 4 Down				LR
 # 5 Left				LL
 def setupDataOrientation():
@@ -130,7 +130,8 @@ def connectOBD():
 				GPIO.output(LED_PINS[0], 1)
 				break
 			connection.close()
-			time.sleep(1)
+			debug("waiting...")
+			time.sleep(5)
 		except (KeyboardInterrupt, SystemExit):
 			GPIO.cleanup()
 			raise
@@ -150,7 +151,7 @@ def logData():
 	debug(filename)
 	
 	with open(filename, 'w') as csvfile:
-		fieldnames = ['time', 'engineLoad', 'coolantTemp', 'rpm', 'speed', 'intakeTemp', 'maf', 'throttlePos', 'timingAdvance', 'xG', 'yG', 'zG', 'orientation', 'gpsSpeed', 'gpsLat', 'gpsLon', 'gpsAlt', 'gpsClimb']
+		fieldnames = ['time', 'engineLoad', 'coolantTemp', 'rpm', 'speed', 'intakeTemp', 'maf', 'throttlePos', 'timingAdvance', 'xG', 'yG', 'zG', 'gpsSpeed', 'gpsLat', 'gpsLon', 'gpsAlt', 'gpsClimb']
 		writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 		writer.writeheader()
 		
