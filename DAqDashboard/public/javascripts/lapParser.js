@@ -74,6 +74,7 @@ function toGridSquare(param1, param2) {
 function processLaps() {
 	lap = 0;
 	temp = [];
+	track = null;
 	tempGeo = {
 		type: "LineString",
 		coordinates: []
