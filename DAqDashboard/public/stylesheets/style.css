@@ -20,7 +20,7 @@ main {
   float: left;
   position: relative;
   /*display: block;*/
-  /*width: 900px;*/
+  width: 900px;
   /*border: 1px solid red;*/
 }
 
@@ -61,7 +61,7 @@ circle.dashed {
   stroke-dasharray: 4,3;
 }
 
-/*.axis {
+.axis {
   fill: none;
   stroke: #ddd;
   stroke-dasharray: 4,3;
@@ -70,7 +70,7 @@ circle.dashed {
 .axis text {
   font-size: .75em;
   stroke-dasharray: none;
-}*/
+}
 
 main ul.legend li {
   background: #666;
@@ -121,4 +121,8 @@ path.track {
 .line {
   background: #000;
   opacity: .2;
+}
+
+circle.outline {
+  fill: none;
 }
