@@ -49,6 +49,7 @@ PL_BITS = 2
 BAFRO = 0b100000
 BAFRO_THRES = 0.5
 DEBUG = False
+PWD = '/home/pi/DAq/'
 
 # Global Variables
 connection = None
@@ -82,7 +83,7 @@ def setupStartLine():
 	gridSQ = curLat = curLon = None
 	found = False
 	
-	with open('trackInfo.json') as trackInfoFile:
+	with open(PWD + 'trackInfo.json') as trackInfoFile:
 		trackInfoData = json.load(trackInfoFile)
 	report = gpsNext()
 	if report['class'] == 'TPV':
@@ -221,7 +222,7 @@ def logData():
 	
 	debug(filename)
 	
-	with open(filename, 'w') as csvfile:
+	with open(PWD + filename, 'w') as csvfile:
 		fieldnames = ['time', 'lap', 'engineLoad', 'coolantTemp', 'rpm', 'speed', 'intakeTemp', 'maf', 'throttlePos', 'timingAdvance', 'xG', 'yG', 'zG', 'gpsSpeed', 'gpsLat', 'gpsLon', 'gpsAlt', 'gpsClimb']
 		writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 		writer.writeheader()
@@ -287,7 +288,7 @@ if __name__ == "__main__":
 	logging.basicConfig(level=logging.DEBUG,
 								format='%(asctime)s %(levelname)-8s %(message)s',
 								datefmt='%m-%d %H:%M',
-								filename="exception.log")
+								filename=PWD + "exception.log")
 	
 	accel = mma.MMA8451()
 	ismma = accel.check8451()
@@ -301,8 +302,6 @@ if __name__ == "__main__":
 	
 	session = gps.gps("localhost", "2947")
 	session.stream(gps.WATCH_ENABLE | gps.WATCH_NEWSTYLE)
-	for i in range(3):
-		session.next()
 	
 	setupStartLine()
 	
