@@ -5,9 +5,12 @@ import gps
 import sys
 import logging
 import smbus
+import json
 import MMA8451 as mma
+import ToGrid as grid
 import RPi.GPIO as GPIO
 from datetime import datetime
+from Point import Point
 
 # Global Constants
 ORIENTATION_MAPPING = {
@@ -52,11 +55,21 @@ connection = None
 accel = None
 session = None
 transform = None
+start1 = None
+start2 = None
+point3 = None
+point4 = None
 
 def debug(str):
 	if DEBUG:
 		print str
-		
+
+def CCW(p1, p2, p3):
+	return (p3.y - p1.y) * (p2.x - p1.x) > (p2.y - p1.y) * (p3.x - p1.x)
+
+def isIntersect(p1, p2, p3, p4):
+	return (CCW(p1, p3, p4) != CCW(p2, p3, p4)) and (CCW(p1, p2, p3) != CCW(p1, p2, p4))
+
 def setupGPIO():
 	GPIO.setmode(GPIO.BCM)
 	for x in DIP_PINS:
@@ -64,6 +77,30 @@ def setupGPIO():
 	for x in LED_PINS:
 		GPIO.setup(x, GPIO.OUT)
 		GPIO.output(x, 0)
+
+def setupStartLine():
+	gridSQ = curLat = curLon = None
+	found = False
+	
+	with open('trackInfo.json') as trackInfoFile:
+		trackInfoData = json.load(trackInfoFile)
+	report = gpsNext()
+	if report['class'] == 'TPV':
+		if hasattr(report, 'lat'):
+			curLat = report.lat
+		if hasattr(report, 'lon'):
+			curLon = report.lon
+	gridSQ = grid.toGrid(curLat, curLon)
+	
+	for track in trackInfoData['trackInfo']:
+		for square in track['gridSQ']:
+			if square == gridSQ:
+				found = True
+		if found:
+			start1 = Point(track['x1'], track['y1'])
+			start2 = Point(track['x2'], track['x2'])
+			debug(track['name'])
+			break
 
 # Direction of accelerometer
 # Front 				Down (getOrientation())
@@ -100,7 +137,14 @@ def setupDataOrientation():
 	if transform == None:
 		logging.warning("key not found: " + bin(key))
 		transform = lambda x, y, z: (-y, z, -x)
-		
+
+def gpsNext():
+	report = session.next()
+	while report['class'] != 'TPV':
+		report = session.next()
+	
+	return report
+
 def connectOBD():
 	global connection
 	while True:
@@ -143,15 +187,42 @@ def disconnectOBD():
 	connection.stop()
 	connection.close()
 	GPIO.output(LED_PINS[0], 0)
+	time.sleep(5)
+
+def waitToCrossStartLine():
+	x = y = None
+	
+	report = gpsNext()
+	if report['class'] == 'TPV':
+		if hasattr(report, 'lon'):
+			x = report.lon
+		if hasattr(report, 'lat'):
+			y = report.lat
+	point3 = point4 = Point(x, y)
+	
+	while not isIntersect(start1, start2, point3, point4):
+		point3 = point4
+		report = gpsNext()
+		if report['class'] == 'TPV':
+			if hasattr(report, 'lon'):
+				x = report.lon
+			if hasattr(report, 'lat'):
+				y = report.lat
+		point4 = Point(x, y)
 
 def logData():
-	filename = time.strftime("%Y%m%d%H%M.csv")
 	gpsSpeed = gpsLat = gpsLon = gpsAlt = gpsClimb = None
+	lap = 1
+	
+	report = session.next()
+	while not hasattr(report, 'time'):
+		report = session.next()
+	filename = report['time'] + ".csv"
 	
 	debug(filename)
 	
 	with open(filename, 'w') as csvfile:
-		fieldnames = ['time', 'engineLoad', 'coolantTemp', 'rpm', 'speed', 'intakeTemp', 'maf', 'throttlePos', 'timingAdvance', 'xG', 'yG', 'zG', 'gpsSpeed', 'gpsLat', 'gpsLon', 'gpsAlt', 'gpsClimb']
+		fieldnames = ['time', 'lap', 'engineLoad', 'coolantTemp', 'rpm', 'speed', 'intakeTemp', 'maf', 'throttlePos', 'timingAdvance', 'xG', 'yG', 'zG', 'gpsSpeed', 'gpsLat', 'gpsLon', 'gpsAlt', 'gpsClimb']
 		writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 		writer.writeheader()
 		
@@ -162,27 +233,30 @@ def logData():
 		
 		debug("Start logging data.")
 		GPIO.output(LED_PINS[1], 1)
+		now = time.time()
 		while rpm > 0:
-			report = session.next()
-			while report['class'] != 'TPV':
-				report = session.next()
+			point3 = point4
+			report = gpsNext()
 			if report['class'] == 'TPV':
 				if hasattr(report, 'speed'):
 					gpsSpeed = report.speed * gps.MPS_TO_MPH
-				if hasattr(report, 'lat'):
-					gpsLat = report.lat
 				if hasattr(report, 'lon'):
 					gpsLon = report.lon
+				if hasattr(report, 'lat'):
+					gpsLat = report.lat
 				if hasattr(report, 'alt'):
 					gpsAlt = report.alt
 				if hasattr(report, 'climb'):
 					gpsClimb = report.climb * gps.MPS_TO_MPH
-			timestamp = datetime.now().strftime("%X.%f")
 			x, y, z = accel.readScaledData()
 			x, y, z = transform(x, y, z)
 			rpm = connection.query(obd.commands.RPM).value
+			point4 = Point(gpsLon, gpsLat)
+			if isIntersect(start1, start2, point3, point4):
+				lap = lap + 1
 			writer.writerow(
-				{'time': timestamp,
+				{'time': time.time() - now,
+				'lap': lap,
 				'engineLoad': connection.query(obd.commands.ENGINE_LOAD).value,
 				'coolantTemp': connection.query(obd.commands.COOLANT_TEMP).value,
 				'rpm': rpm,
@@ -195,8 +269,8 @@ def logData():
 				'yG' : y,
 				'zG' : z,
 				'gpsSpeed' : gpsSpeed,
-				'gpsLat' : gpsLat,
 				'gpsLon' : gpsLon,
+				'gpsLat' : gpsLat,
 				'gpsAlt' : gpsAlt,
 				'gpsClimb' : gpsClimb})
 			time.sleep(0.1)
@@ -230,9 +304,12 @@ if __name__ == "__main__":
 	for i in range(3):
 		session.next()
 	
+	setupStartLine()
+	
 	while True:
 		connectOBD()
 		try:
+			waitToCrossStartLine()
 			logData()
 		except:
 			disconnectOBD()
